@@ -74,7 +74,55 @@
                 </div>
             </header>
 
-            
+            <section
+                class="bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-md border border-blue-700 max-w-3xl">
+
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 id="current-location" class="text-3xl font-bold tracking-tight">Bhopal, MP, India</h2>
+                    </div>
+                    <span id="current-date"
+                        class="text-sm font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                        24 May 2026
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mb-6">
+                    <div>
+                        <div class="text-xs uppercase tracking-wider font-semibold opacity-80 mb-1">Weather Today</div>
+                        <div class="flex items-center gap-4">
+                            <span id="main-temp" class="text-6xl font-extrabold tracking-tighter">39°C</span>
+                            <span id="weather-icon" class="text-5xl drop-shadow-md">☀️</span>
+                        </div>
+                        <div id="weather-condition" class="text-lg font-medium mt-1">Sunny</div>
+                    </div>
+
+                    <div class="flex flex-col md:items-end gap-3 text-sm">
+                        <div class="font-medium text-base">
+                            Day - <span id="day-max" class="font-semibold">44°C</span> • Night - <span id="night-min"
+                                class="font-semibold">32°C</span>
+                        </div>
+                        <div id="sun-intervals"
+                            class="border border-white/30 border-dashed bg-white/5 p-2 rounded-lg text-xs leading-relaxed max-w-xs md:text-right">
+                            <span class="block">🌅 Sunrise: <span class="font-semibold">05:38 AM</span></span>
+                            <span class="block">🌇 Sunset: <span class="font-semibold">07:05 PM</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-8 border-t border-white/20 pt-4 text-sm font-medium">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">💧</span>
+                        <div>Humidity: <span id="humidity-value" class="font-semibold">18%</span></div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">💨</span>
+                        <div>Wind: <span id="wind-value" class="font-semibold">18 km/h</span> <span id="wind-direction"
+                                class="inline-block transform rotate-45">⬇️</span></div>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
     <script src="./index.js"></script>
