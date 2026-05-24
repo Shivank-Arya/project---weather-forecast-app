@@ -6,11 +6,35 @@
     <title>Weather Forecast Application</title>
     <link href="./style.css" rel="stylesheet">
 </head>
-<body>
-    <h1 class="text-3xl font-bold underline bg-blue-400">Weather Forecast Application</h1>
+<body class="bg-gray-50 text-gray-800 antialiased font-sans">
 
+    <div class="flex min-h-screen">
+        
+        <aside class="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between shrink-0">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-8">
+                    Weather Channel
+                </h1>
+                
+                <nav class="space-y-2">
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold bg-blue-50 text-blue-600 transition">
+                        <span>Today</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                        <span>5 day</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                        <span>Air Quality Index</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="text-xs text-gray-400">
+                Powered by OpenWeather
+            </div>
+        </aside>
 
-
+    </div>
 
     <script src="./index.js"></script>
 </body>
