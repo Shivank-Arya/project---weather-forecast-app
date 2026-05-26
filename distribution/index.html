@@ -11,20 +11,32 @@
 
 <body class="bg-gray-50 text-gray-800 antialiased font-sans">
     <!-- ROOT LAYOUT CONTAINER: Maintains identical frame structure for navigation consistency -->
-    <div class="flex min-h-screen">
-
+        <div class="flex flex-col min-h-screen md:flex-row">
         <!-- =========================================================================
          1. LEFT SIDEBAR NAVIGATION PANEL (Shared Component)
          ========================================================================= -->
-        <aside class="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between shrink-0">
+        <aside class="w-full bg-white border-b border-gray-200 p-4 md:p-6 md:w-64 md:border-r md:border-b-0 flex flex-col justify-between shrink-0">
             <div>
-                <!-- Brand Title -->
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-8">
-                    Weather Channel
-                </h1>
+                <div class="flex items-center justify-between">
+                    <!-- Brand Title -->
+                    <a href="index.html">
+                        <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-0">
+                            Weather Channel
+                        </h1>
+                    </a>
+                    <button id="nav-toggle" type="button"
+                        class="md:hidden inline-flex items-center justify-center rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        aria-expanded="false" aria-controls="mobile-nav">
+                        <span class="sr-only">Open navigation</span>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
 
                 <!-- Navigational Routing Context Links -->
-                <nav class="space-y-2">
+                <nav id="mobile-nav" class="mt-4 space-y-2 hidden md:block md:mt-6">
                     <!-- Active routing tab state shifted over to "Today" -->
                     <a href="index.html"
                         class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold bg-blue-50 text-blue-600 transition">
@@ -49,7 +61,7 @@
         <!-- =========================================================================
          MAIN VIEWPORT DASHBOARD CONTENT AREA
          ========================================================================= -->
-        <main class="flex-1 p-8 flex flex-col gap-6 max-w-5xl">
+        <main class="flex-1 p-4 md:p-8 flex flex-col gap-6 max-w-5xl mx-auto w-full">
 
             <!-- =========================================================================
              2. TOP NAVBAR CONTROLS (Shared Component)
@@ -93,7 +105,7 @@
              - Informing user about current temperature, Day/night temperature difference, humidity, sunrise/sunset time for the day and wind speed and direction. 
              ========================================================================= -->
             <section
-                class="bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-md border border-blue-700 max-w-3xl">
+                class="bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-md border border-blue-700 max-w-full w-full">
 
                 <!-- Current Location | Today's Date -->
                 <div class="flex justify-between items-start mb-6">
@@ -149,9 +161,9 @@
              4. SUB-HERO COMPONENT: Extended Forecast - 
               - Predictions about the forecast for the coming 5 days - expected weather conditions, day/night temperature difference and humidity level. 
              ========================================================================= -->
-            <section class="max-w-3xl">
+            <section class="max-w-full w-full">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Extended Forecast</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                     <!-- Card 1 -->
                     <div
                         class="bg-white border border-gray-200 rounded-xl p-4 text-center flex flex-col items-center justify-between shadow-sm">
