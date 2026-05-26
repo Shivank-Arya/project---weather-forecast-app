@@ -5,30 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>5-Day Weather Forecast</title>
+    <!-- External stylesheet linking your compiled Tailwind setup -->
     <link href="./style.css" rel="stylesheet">
 </head>
 
 <body class="bg-gray-50 text-gray-800 antialiased font-sans">
 
+    <!-- ROOT LAYOUT CONTAINER: Maintains identical frame structure for navigation consistency -->
     <div class="flex min-h-screen">
 
+        <!-- =========================================================================
+         1. LEFT SIDEBAR NAVIGATION PANEL (Shared Component)
+         ========================================================================= -->
         <aside class="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between shrink-0">
             <div>
+                <!-- Brand Title -->
                 <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-8">
                     Weather Channel
                 </h1>
 
+                <!-- Navigational Routing Context Links -->
                 <nav class="space-y-2">
                     <a href="index.html"
                         class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
                         <span>Today</span>
                     </a>
+                    <!-- Active routing tab state shifted over to "5 day" -->
                     <a href="5day.html"
-                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold bg-blue-50 text-blue-600 transition">
-                        <span>5 day</span>
+                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                        <span>5 Day</span>
                     </a>
                     <a href="aqi.html"
-                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold bg-blue-50 text-blue-600 transition">
                         <span>Air Quality Index</span>
                     </a>
                 </nav>
@@ -39,9 +47,16 @@
             </div>
         </aside>
 
+        <!-- =========================================================================
+         MAIN VIEWPORT DASHBOARD CONTENT AREA
+         ========================================================================= -->
         <main class="flex-1 p-8 flex flex-col gap-6 max-w-5xl">
 
+            <!-- =========================================================================
+             2. TOP NAVBAR CONTROLS (Shared Component)
+             ========================================================================= -->
             <header class="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                <!-- Search Query Form Interface -->
                 <form class="flex items-center max-w-sm w-full">
                     <label for="city-search" class="sr-only">Search City</label>
                     <div class="relative w-full">
@@ -55,25 +70,33 @@
                     </div>
                 </form>
 
+                <!-- Status Metadata Indicators and Unit Selection Panel -->
                 <div class="flex items-center justify-end gap-6 text-sm font-medium text-gray-600">
-                    <span class="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700">
+                    <span
+                        class="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700">
                         🌐 IN
                     </span>
                     <div class="inline-flex rounded-md shadow-sm border border-gray-200 bg-white p-0.5" role="group">
-                        <button type="button" id="unit-f" class="px-3 py-1 text-xs font-medium text-gray-700 rounded-md hover:bg-gray-50">°F</button>
-                        <button type="button" id="unit-c" class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md shadow-sm">°C</button>
+                        <button type="button" id="unit-f"
+                            class="px-3 py-1 text-xs font-medium text-gray-700 rounded-md hover:bg-gray-50">°F</button>
+                        <button type="button" id="unit-c"
+                            class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md shadow-sm">°C</button>
                     </div>
                 </div>
             </header>
 
+            <!-- =========================================================================
+             3. HERO COMPONENT: 5 day Prediction
+             - Informing the user about today's weather condition as well as the predictions for the next coming 5 days in detail
+             ========================================================================= -->
             <section class="max-w-3xl">
                 <div class="flex justify-between items-baseline mb-3">
                     <h2 class="text-xl font-bold text-gray-900">Today's Forecast</h2>
                     <span class="text-sm font-semibold text-gray-500">Bhopal, MP</span>
                 </div>
-                
+                <!-- Day conditions -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    
+
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                         <div class="flex justify-between items-center mb-3">
                             <span class="text-sm font-bold text-gray-900 uppercase tracking-wider">Day</span>
@@ -83,16 +106,22 @@
                             <span id="today-day-temp" class="text-5xl font-extrabold tracking-tighter">44°</span>
                             <span class="text-4xl">⛅</span>
                         </div>
-                        <p class="text-sm text-gray-600 leading-relaxed">Partly cloudy. High 44°C. Winds WNW at 15 to 25 km/h.</p>
-                        
+                        <p class="text-sm text-gray-600 leading-relaxed">Partly cloudy. High 44°C. Winds WNW at 15 to 25
+                            km/h.</p>
+
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100 text-xs">
-                            <div><span class="text-gray-400 block mb-0.5">💧 Humidity</span><span class="font-bold text-gray-800 text-sm">20%</span></div>
-                            <div><span class="text-gray-400 block mb-0.5">☀️ UV Index</span><span class="font-bold text-gray-800 text-sm">Extreme</span></div>
-                            <div><span class="text-gray-400 block mb-0.5">🌅 Sunrise</span><span class="font-bold text-gray-800 text-sm">05:38 AM</span></div>
-                            <div><span class="text-gray-400 block mb-0.5">🌇 Sunset</span><span class="font-bold text-gray-800 text-sm">07:05 PM</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">💧 Humidity</span><span
+                                    class="font-bold text-gray-800 text-sm">20%</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">☀️ UV Index</span><span
+                                    class="font-bold text-gray-800 text-sm">Extreme</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">🌅 Sunrise</span><span
+                                    class="font-bold text-gray-800 text-sm">05:38 AM</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">🌇 Sunset</span><span
+                                    class="font-bold text-gray-800 text-sm">07:05 PM</span></div>
                         </div>
                     </div>
 
+                    <!-- Night conditions -->
                     <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                         <div class="flex justify-between items-center mb-3">
                             <span class="text-sm font-bold text-gray-900 uppercase tracking-wider">Night</span>
@@ -102,27 +131,36 @@
                             <span id="today-night-temp" class="text-5xl font-extrabold tracking-tighter">29°</span>
                             <span class="text-4xl">🌙</span>
                         </div>
-                        <p class="text-sm text-gray-600 leading-relaxed">Generally clear. Low 29°C. Winds WNW at 10 to 15 km/h.</p>
-                        
+                        <p class="text-sm text-gray-600 leading-relaxed">Generally clear. Low 29°C. Winds WNW at 10 to
+                            15 km/h.</p>
+
                         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-gray-100 text-xs">
-                            <div><span class="text-gray-400 block mb-0.5">💧 Humidity</span><span class="font-bold text-gray-800 text-sm">27%</span></div>
-                            <div><span class="text-gray-400 block mb-0.5">✨ UV Index</span><span class="font-bold text-gray-800 text-sm">0 of 11</span></div>
-                            <div><span class="text-gray-400 block mb-0.5">🌙 Moonrise</span><span class="font-bold text-gray-800 text-sm">02:52 PM</span></div>
-                            <div><span class="text-gray-400 block mb-0.5">🌘 Moonset</span><span class="font-bold text-gray-800 text-sm">02:07 AM</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">💧 Humidity</span><span
+                                    class="font-bold text-gray-800 text-sm">27%</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">✨ UV Index</span><span
+                                    class="font-bold text-gray-800 text-sm">0 of 11</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">🌙 Moonrise</span><span
+                                    class="font-bold text-gray-800 text-sm">02:52 PM</span></div>
+                            <div><span class="text-gray-400 block mb-0.5">🌘 Moonset</span><span
+                                    class="font-bold text-gray-800 text-sm">02:07 AM</span></div>
                         </div>
                     </div>
 
                 </div>
             </section>
 
+            <!-- weather prediction for coming 5 days -->
             <section class="max-w-3xl">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">5-Day Extended Horizon</h3>
-                
-                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100">
-                    
+
+                <!-- day 1 -->
+                <div
+                    class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm divide-y divide-gray-100">
+
                     <div class="flex items-center justify-between p-4 hover:bg-gray-50/70 transition">
                         <div class="w-24 text-sm font-bold text-gray-900">Wed 27</div>
-                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span class="font-bold">45°</span> / 31°</div>
+                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span
+                                class="font-bold">45°</span> / 31°</div>
                         <div class="flex items-center gap-3 flex-1 px-4">
                             <span class="text-2xl">☀️</span>
                             <span class="text-xs sm:text-sm text-gray-600 font-medium">Sunny</span>
@@ -132,9 +170,11 @@
                         </div>
                     </div>
 
+                    <!-- day 2 -->
                     <div class="flex items-center justify-between p-4 hover:bg-gray-50/70 transition">
                         <div class="w-24 text-sm font-bold text-gray-900">Thu 28</div>
-                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span class="font-bold">42°</span> / 27°</div>
+                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span
+                                class="font-bold">42°</span> / 27°</div>
                         <div class="flex items-center gap-3 flex-1 px-4">
                             <span class="text-2xl">⛅</span>
                             <span class="text-xs sm:text-sm text-gray-600 font-medium">Mostly Sunny</span>
@@ -144,9 +184,11 @@
                         </div>
                     </div>
 
+                    <!-- day 3 -->
                     <div class="flex items-center justify-between p-4 hover:bg-gray-50/70 transition">
                         <div class="w-24 text-sm font-bold text-gray-900">Fri 29</div>
-                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span class="font-bold">35°</span> / 24°</div>
+                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span
+                                class="font-bold">35°</span> / 24°</div>
                         <div class="flex items-center gap-3 flex-1 px-4">
                             <span class="text-2xl">⛈️</span>
                             <span class="text-xs sm:text-sm text-gray-600 font-medium">PM T-Storms</span>
@@ -156,9 +198,11 @@
                         </div>
                     </div>
 
+                    <!-- day 4 -->
                     <div class="flex items-center justify-between p-4 hover:bg-gray-50/70 transition">
                         <div class="w-24 text-sm font-bold text-gray-900">Sat 30</div>
-                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span class="font-bold">34°</span> / 25°</div>
+                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span
+                                class="font-bold">34°</span> / 25°</div>
                         <div class="flex items-center gap-3 flex-1 px-4">
                             <span class="text-2xl">⛈️</span>
                             <span class="text-xs sm:text-sm text-gray-600 font-medium">PM T-Storms</span>
@@ -168,9 +212,11 @@
                         </div>
                     </div>
 
+                    <!-- day 5 -->
                     <div class="flex items-center justify-between p-4 hover:bg-gray-50/70 transition">
                         <div class="w-24 text-sm font-bold text-gray-900">Sun 31</div>
-                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span class="font-bold">35°</span> / 26°</div>
+                        <div class="w-24 text-sm font-semibold text-gray-800 text-center"><span
+                                class="font-bold">35°</span> / 26°</div>
                         <div class="flex items-center gap-3 flex-1 px-4">
                             <span class="text-2xl">⛅</span>
                             <span class="text-xs sm:text-sm text-gray-600 font-medium">Partly Cloudy</span>
