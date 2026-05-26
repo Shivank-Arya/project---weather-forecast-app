@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality Index - Weather Channel</title>
+    <!-- External stylesheet linking your compiled Tailwind setup -->
+    <link href="./style.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 text-gray-800 antialiased font-sans">
+
+    <!-- ROOT LAYOUT CONTAINER: Maintains identical frame structure for navigation consistency -->
+    <div class="flex min-h-screen">
+
+        <!-- =========================================================================
+         1. LEFT SIDEBAR NAVIGATION PANEL (Shared Component)
+         ========================================================================= -->
+        <aside class="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Brand Title -->
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-8">
+                    Weather Channel
+                </h1>
+
+                <!-- Navigational Routing Context Links -->
+                <nav class="space-y-2">
+                    <a href="index.html"
+                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                        <span>Today</span>
+                    </a>
+                    <a href="5day.html"
+                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                        <span>5 day</span>
+                    </a>
+                    <!-- Active routing tab state shifted over to "Air Quality Index" -->
+                    <a href="aqi.html"
+                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold bg-blue-50 text-blue-600 transition">
+                        <span>Air Quality Index</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="text-xs text-gray-400">
+                Powered by OpenWeather
+            </div>
+        </aside>
+
+        <!-- =========================================================================
+         MAIN VIEWPORT DASHBOARD CONTENT AREA
+         ========================================================================= -->
+        <main class="flex-1 p-8 flex flex-col gap-6 max-w-5xl">
+
+            <!-- =========================================================================
+             2. TOP NAVBAR CONTROLS (Shared Component)
+             ========================================================================= -->
+            <header class="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                <!-- Search Query Form Interface -->
+                <form class="flex items-center max-w-sm w-full">
+                    <label for="city-search" class="sr-only">Search City</label>
+                    <div class="relative w-full">
+                        <input type="text" id="city-search"
+                            class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10"
+                            placeholder="Search city..." required />
+                        <button type="submit"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-blue-600">
+                            <span>🔍</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Status Metadata Indicators and Unit Selection Panel -->
+                <div class="flex items-center justify-end gap-6 text-sm font-medium text-gray-600">
+                    <span class="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700">
+                        🌐 IN
+                    </span>
+                    <div class="inline-flex rounded-md shadow-sm border border-gray-200 bg-white p-0.5" role="group">
+                        <button type="button" id="unit-f" class="px-3 py-1 text-xs font-medium text-gray-700 rounded-md hover:bg-gray-50">°F</button>
+                        <button type="button" id="unit-c" class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md shadow-sm">°C</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- =========================================================================
+             3. HERO COMPONENT: TODAY'S AIR QUALITY SUMMARY
+             - Features the layout split and radial gauge design inspired by image_4606a9.png
+             ========================================================================= -->
+            <section class="max-w-3xl">
+                <div class="flex justify-between items-baseline mb-3">
+                    <h2 class="text-xl font-bold text-gray-900">Today's Air Quality</h2>
+                    <span class="text-sm font-semibold text-gray-500">Bhopal, MP</span>
+                </div>
+
+                <!-- Main Overview Dashboard Card Box -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-center">
+                    
+                    <!-- Left Split Block: Status Indicator and Gauge Ring Context -->
+                    <div class="flex items-center gap-6">
+                        <!-- Simulated Radial Metric Circle Indicator Gauge -->
+                        <div class="relative w-24 h-24 rounded-full border-4 border-emerald-500 flex items-center justify-center bg-gray-50 shrink-0">
+                            <span id="aqi-main-value" class="text-3xl font-black text-gray-900">58</span>
+                        </div>
+                        
+                        <!-- Main Index Evaluation Summary Descriptive Copy -->
+                        <div>
+                            <h3 id="aqi-status-text" class="text-2xl font-extrabold text-gray-900">Satisfactory</h3>
+                            <p id="aqi-health-advice" class="text-sm text-gray-500 max-w-sm mt-0.5">
+                                May cause minor breathing discomfort to sensitive people.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right Split Block: Primary Pollutant Tracking Sidebar Context -->
+                    <div class="w-full md:w-auto md:border-l border-gray-100 md:pl-8 text-sm flex flex-col justify-center min-w-[200px]">
+                        <span class="text-xs uppercase tracking-wider font-semibold text-gray-400 block mb-1">Primary Pollutant</span>
+                        <span id="primary-pollutant-id" class="font-bold text-gray-900 text-base">PM2.5</span>
+                        <span class="text-xs text-gray-500 mt-0.5">(Particulate matter less than 2.5 microns)</span>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- =========================================================================
+             4. DETAILED BREAKDOWN MATRIX: ALL POLLUTANTS GRID
+             - Maps to the individual sub-metric array indices inside OpenWeather's Air Pollution payload
+             ========================================================================= -->
+            <section class="max-w-3xl">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">All Pollutants</h3>
+
+                <!-- Two-Column Response Layout Grid Track -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <!-- POLLUTANT COMPONENT 1: PM2.5 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                        <!-- Mini Parameter Value Gauge Ring -->
+                        <div class="w-14 h-14 rounded-full border-2 border-emerald-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">58</div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-sm text-gray-900">PM2.5 <span class="font-normal text-gray-500 text-xs">(Particulate matter &lt; 2.5µm)</span></h4>
+                            <div class="text-emerald-600 font-semibold mt-0.5">Satisfactory</div>
+                            <div class="text-gray-400 mt-0.5">52.15 µg/m³</div>
+                        </div>
+                    </div>
+
+                    <!-- POLLUTANT COMPONENT 2: CO (Carbon Monoxide) -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">22</div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-sm text-gray-900">CO <span class="font-normal text-gray-500 text-xs">(Carbon Monoxide)</span></h4>
+                            <div class="text-green-600 font-semibold mt-0.5">Good</div>
+                            <div class="text-gray-400 mt-0.5">420 µg/m³</div>
+                        </div>
+                    </div>
+
+                    <!-- POLLUTANT COMPONENT 3: NO2 (Nitrogen Dioxide) -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">26</div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-sm text-gray-900">NO2 <span class="font-normal text-gray-500 text-xs">(Nitrogen Dioxide)</span></h4>
+                            <div class="text-green-600 font-semibold mt-0.5">Good</div>
+                            <div class="text-gray-400 mt-0.5">24.97 µg/m³</div>
+                        </div>
+                    </div>
+
+                    <!-- POLLUTANT COMPONENT 4: O3 (Ozone) -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">22</div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-sm text-gray-900">O3 <span class="font-normal text-gray-500 text-xs">(Ozone)</span></h4>
+                            <div class="text-green-600 font-semibold mt-0.5">Good</div>
+                            <div class="text-gray-400 mt-0.5">51.44 µg/m³</div>
+                        </div>
+                    </div>
+
+                    <!-- POLLUTANT COMPONENT 5: PM10 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">36</div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-sm text-gray-900">PM10 <span class="font-normal text-gray-500 text-xs">(Particulate matter &lt; 10µm)</span></h4>
+                            <div class="text-green-600 font-semibold mt-0.5">Good</div>
+                            <div class="text-gray-400 mt-0.5">33.07 µg/m³</div>
+                        </div>
+                    </div>
+
+                    <!-- POLLUTANT COMPONENT 6: SO2 (Sulphur Dioxide) -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">16</div>
+                        <div class="text-xs">
+                            <h4 class="font-bold text-sm text-gray-900">SO2 <span class="font-normal text-gray-500 text-xs">(Sulphur Dioxide)</span></h4>
+                            <div class="text-green-600 font-semibold mt-0.5">Good</div>
+                            <div class="text-gray-400 mt-0.5">16.18 µg/m³</div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+    </div>
+    <!-- External functional logic pipeline linkage -->
+    <script src="./index.js"></script>
+</body>
+
+</html>
