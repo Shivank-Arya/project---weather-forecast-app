@@ -2,16 +2,16 @@ const API_KEY = '6d92c0d7e1d91eabc65a0b9d974bdc9c';
 
 // List of Indian States 
 const INDIAN_STATE_MAPPING = {
-    "assam": "Guwahati", 
+    "assam": "Guwahati",
     "madhya pradesh": "Bhopal",
     "maharashtra": "Mumbai",
     "uttar pradesh": "Lucknow",
-    "bihar": "Patna", 
+    "bihar": "Patna",
     "west bengal": "Kolkata",
     "rajasthan": "Jaipur",
     "gujarat": "Ahmedabad",
     "karnataka": "Bengaluru",
-    "andhra pradesh": "Vijayawada", 
+    "andhra pradesh": "Vijayawada",
     "odisha": "Bhubaneswar",
     "telangana": "Hyderabad",
     "kerala": "Thiruvananthapuram",
@@ -55,6 +55,100 @@ const windDirectionDOM = document.getElementById("wind-direction");
 // Sunrise/Sunset Time Elements
 const sunriseDOM = document.getElementById("sunrise-time");
 const sunsetDOM = document.getElementById("sunset-time");
+
+// Weather Card
+const weatherCardDOM = document.getElementById("weather-card");
+
+const WEATHER_THEMES = {
+    // --- CLEAR SKY ---
+    "clear sky": { from: "#38bdf8", to: "#2563eb", border: "border-blue-500" }, // Sky-400 to Blue-600
+
+    // --- CLOUDS GROUP ---
+    "few clouds": { from: "#94a3b8", to: "#1d4ed8", border: "border-slate-500" }, // Slate-400 to Blue-700
+    "scattered clouds": { from: "#94a3b8", to: "#1e40af", border: "border-slate-600" }, // Slate-400 to Blue-800
+    "broken clouds": { from: "#64748b", to: "#334155", border: "border-slate-600" }, // Slate-500 to Slate-700
+    "overcast clouds": { from: "#71717a", to: "#1e293b", border: "border-slate-700" }, // Zinc-500 to Slate-800 (Tokyo's Fix)
+
+    // --- DRIZZLE GROUP ---
+    "light intensity drizzle": { from: "#2dd4bf", to: "#475569", border: "border-teal-600" },
+    "drizzle": { from: "#14b8a6", to: "#334155", border: "border-teal-700" },
+    "heavy intensity drizzle": { from: "#0d9488", to: "#1e293b", border: "border-teal-800" },
+    "light intensity drizzle rain": { from: "#06b6d4", to: "#334155", border: "border-cyan-600" },
+    "drizzle rain": { from: "#0891b2", to: "#1e293b", border: "border-cyan-700" },
+    "heavy intensity drizzle rain": { from: "#0e7490", to: "#0f172a", border: "border-cyan-900" },
+    "shower drizzle": { from: "#14b8a6", to: "#1e40af", border: "border-teal-600" },
+
+    // --- RAIN GROUP ---
+    "light rain": { from: "#60a5fa", to: "#475569", border: "border-blue-500" },
+    "moderate rain": { from: "#3b82f6", to: "#334155", border: "border-blue-600" },
+    "heavy intensity rain": { from: "#2563eb", to: "#1e293b", border: "border-blue-700" },
+    "very heavy rain": { from: "#1d4ed8", to: "#0f172a", border: "border-blue-900" },
+    "extreme rain": { from: "#312e81", to: "#1e293b", border: "border-black" },
+    "freezing rain": { from: "#7dd3fc", to: "#334155", border: "border-sky-400" },
+    "light intensity shower rain": { from: "#60a5fa", to: "#1e40af", border: "border-blue-500" },
+    "shower rain": { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-600" },
+    "heavy intensity shower rain": { from: "#2563eb", to: "#1e1b4b", border: "border-blue-900" },
+
+    // --- THUNDERSTORM GROUP ---
+    "thunderstorm with light rain": { from: "#6b21a8", to: "#475569", border: "border-purple-900" },
+    "thunderstorm with rain": { from: "#581c87", to: "#1e293b", border: "border-purple-950" },
+    "thunderstorm with heavy rain": { from: "#3b0764", to: "#27272a", border: "border-black" },
+    "light thunderstorm": { from: "#3730a3", to: "#475569", border: "border-indigo-900" },
+    "thunderstorm": { from: "#312e81", to: "#334155", border: "border-indigo-950" },
+    "heavy thunderstorm": { from: "#1e1b4b", to: "#1e293b", border: "border-black" },
+    "ragged thunderstorm": { from: "#1e293b", to: "#3b0764", border: "border-purple-900" },
+    "thunderstorm with light drizzle": { from: "#581c87", to: "#115e59", border: "border-purple-950" },
+    "thunderstorm with drizzle": { from: "#581c87", to: "#134e4a", border: "border-purple-950" },
+    "thunderstorm with heavy drizzle": { from: "#3b0764", to: "#042f2e", border: "border-black" },
+
+    // --- SNOW GROUP ---
+    "light snow": { from: "#bae6fd", to: "#64748b", border: "border-sky-300" },
+    "snow": { from: "#7dd3fc", to: "#475569", border: "border-sky-400" },
+    "heavy snow": { from: "#38bdf8", to: "#1d4ed8", border: "border-sky-500" },
+    "sleet": { from: "#67e8f9", to: "#475569", border: "border-cyan-400" },
+    "light shower sleet": { from: "#a5f3fc", to: "#64748b", border: "border-cyan-300" },
+    "shower sleet": { from: "#22d3ee", to: "#334155", border: "border-cyan-500" },
+    "light rain and snow": { from: "#93c5fd", to: "#bae6fd", border: "border-blue-400" },
+    "rain and snow": { from: "#60a5fa", to: "#7dd3fc", border: "border-blue-500" },
+    "light shower snow": { from: "#bae6fd", to: "#2563eb", border: "border-sky-300" },
+    "shower snow": { from: "#7dd3fc", to: "#1d4ed8", border: "border-sky-400" },
+    "heavy shower snow": { from: "#38bdf8", to: "#1e40af", border: "border-sky-500" },
+
+    // --- ATMOSPHERE GROUP ---
+    "mist": { from: "#a1a1aa", to: "#475569", border: "border-zinc-500" },
+    "smoke": { from: "#52525b", to: "#1e293b", border: "border-zinc-700" },
+    "haze": { from: "#a1a1aa", to: "#64748b", border: "border-zinc-500" },
+    "sand/dust whirls": { from: "#d97706", to: "#44403c", border: "border-amber-700" },
+    "fog": { from: "#a8a29e", to: "#475569", border: "border-stone-500" },
+    "sand": { from: "#f59e0b", to: "#52525b", border: "border-amber-600" },
+    "dust": { from: "#78716c", to: "#44403c", border: "border-stone-600" },
+    "volcanic ash": { from: "#44403c", to: "#171717", border: "border-black" },
+    "squalls": { from: "#475569", to: "#0f172a", border: "border-slate-700" },
+    "tornado": { from: "#262626", to: "#000000", border: "border-neutral-950" }
+};
+
+// Weather Card Theme
+function updateCardTheme(weatherDescription) {
+    const lookupKey = weatherDescription.toLowerCase().trim();
+    
+    // Default safe fallback if theme lookup returns undefined
+    const theme = WEATHER_THEMES[lookupKey] || { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-700" };
+    
+    // Step A: Strip any prior border classes cleanly
+    const currentClasses = Array.from(weatherCardDOM.classList);
+    currentClasses.forEach(cls => {
+        if (cls.startsWith("border-")) {
+            weatherCardDOM.classList.remove(cls);
+        }
+    });
+    
+    // Step B: Inject the new border style structural token
+    weatherCardDOM.classList.add(theme.border);
+    
+    // Step C: Directly apply explicit colors using native inline CSS gradients. 
+    // This circumvents Tailwind v4's dynamic compilation boundaries flawlessly.
+    weatherCardDOM.style.backgroundImage = `linear-gradient(to bottom, ${theme.from}, ${theme.to})`;
+}
 
 // Initialize application
 function displayCurrentDate() {
@@ -169,14 +263,14 @@ async function getCoordinatesBySearch(cityName) {
 
 // 4. Event Listener for Form Submission (Dynamic Country Check)
 searchForm.addEventListener("submit", async (event) => {
-    event.preventDefault(); 
-    
+    event.preventDefault();
+
     let query = searchInput.value.trim();
-    
+
     if (query) {
         const lowerQuery = query.toLowerCase();
         locationDOM.textContent = "Checking location...";
-        
+
         try {
             // Check if it's an Indian State name
             if (INDIAN_STATE_MAPPING[lowerQuery]) {
@@ -186,21 +280,21 @@ searchForm.addEventListener("submit", async (event) => {
                 // Otherwise, fall back to checking if it's a full country name
                 const countryCheckUrl = `https://restcountries.com/v3.1/name/${encodeURIComponent(query)}?fullText=true`;
                 const countryResponse = await fetch(countryCheckUrl);
-                
+
                 if (countryResponse.ok) {
                     const countryData = await countryResponse.json();
                     if (countryData[0] && countryData[0].capital) {
-                        query = countryData[0].capital[0]; 
+                        query = countryData[0].capital[0];
                     }
                 }
             }
         } catch (err) {
             console.log("Proceeding with direct city coordinates check.");
         }
-        
+
         // This will now receive a clean city name (e.g., "Guwahati") and return perfect weather!
         getCoordinatesBySearch(query);
-        searchInput.value = ""; 
+        searchInput.value = "";
     }
 });
 
@@ -214,6 +308,12 @@ async function fetchWeatherData(lat, lon) {
         if (!response.ok) throw new Error("Weather data fetch failed");
 
         const data = await response.json();
+
+        // Grab the precise specific description string (e.g. "overcast clouds", "light rain")
+        const detailedDescription = data.weather[0].description;
+
+        // Update the entire wrapper setup directly 
+        updateCardTheme(detailedDescription);
 
         // 1. Update Main Temperature & Condition Description
         mainTempDOM.textContent = `${Math.round(data.main.temp)}°C`;
