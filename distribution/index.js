@@ -69,18 +69,22 @@ const windDirectionDOM = document.getElementById("wind-direction");
 const sunriseDOM = document.getElementById("sunrise-time");
 const sunsetDOM = document.getElementById("sunset-time");
 
+// Global state variable to store parsed 5-day forecast objects
+let currentForecastMetricData = []; 
+let currentActiveThemeBg = { from: "#3b82f6", to: "#1d4ed8" };
+const forecastContainerDOM = document.getElementById("forecast-container");
+
 // Weather Card
 const weatherCardDOM = document.getElementById("weather-card");
-
 const WEATHER_THEMES = {
     // --- CLEAR SKY ---
-    "clear sky": { from: "#38bdf8", to: "#2563eb", border: "border-blue-500" }, // Sky-400 to Blue-600
+    "clear sky": { from: "#38bdf8", to: "#2563eb", border: "border-blue-500" },
 
     // --- CLOUDS GROUP ---
-    "few clouds": { from: "#94a3b8", to: "#1d4ed8", border: "border-slate-500" }, // Slate-400 to Blue-700
-    "scattered clouds": { from: "#94a3b8", to: "#1e40af", border: "border-slate-600" }, // Slate-400 to Blue-800
-    "broken clouds": { from: "#64748b", to: "#334155", border: "border-slate-600" }, // Slate-500 to Slate-700
-    "overcast clouds": { from: "#71717a", to: "#1e293b", border: "border-slate-700" }, // Zinc-500 to Slate-800 (Tokyo's Fix)
+    "few clouds": { from: "#94a3b8", to: "#1d4ed8", border: "border-slate-500" },
+    "scattered clouds": { from: "#94a3b8", to: "#1e40af", border: "border-slate-600" },
+    "broken clouds": { from: "#64748b", to: "#334155", border: "border-slate-600" },
+    "overcast clouds": { from: "#71717a", to: "#1e293b", border: "border-slate-700" },
 
     // --- DRIZZLE GROUP ---
     "light intensity drizzle": { from: "#2dd4bf", to: "#475569", border: "border-teal-600" },
@@ -144,10 +148,8 @@ const WEATHER_THEMES = {
 function updateCardTheme(weatherDescription) {
     const lookupKey = weatherDescription.toLowerCase().trim();
     
-    // Default safe fallback if theme lookup returns undefined
     const theme = WEATHER_THEMES[lookupKey] || { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-700" };
     
-    // Step A: Strip any prior border classes cleanly
     const currentClasses = Array.from(weatherCardDOM.classList);
     currentClasses.forEach(cls => {
         if (cls.startsWith("border-")) {
@@ -155,12 +157,14 @@ function updateCardTheme(weatherDescription) {
         }
     });
     
-    // Step B: Inject the new border style structural token
     weatherCardDOM.classList.add(theme.border);
-    
-    // Step C: Directly apply explicit colors using native inline CSS gradients. 
-    // This circumvents Tailwind v4's dynamic compilation boundaries flawlessly.
     weatherCardDOM.style.backgroundImage = `linear-gradient(to bottom, ${theme.from}, ${theme.to})`;
+
+    // Save the active background values globally for the extended forecast sync
+    currentActiveThemeBg = { from: theme.from, to: theme.to };
+    
+    // Force a re-render of the extended forecast cards with the updated background
+    renderExtendedForecast();
 }
 
 // Global state variables for temperature unit tracking
@@ -195,25 +199,24 @@ async function getCityName(lat, lon) {
 
         const data = await response.json();
 
-        // OpenWeatherMap returns an array of results. Grab the first one.
         if (data && data.length > 0) {
             countryDOM.textContent = `🌐 ${data[0].country}`;
             const cityName = data[0].name;
-            const stateName = data[0].state; // <-- Extract the state
+            const stateName = data[0].state; 
             const country = data[0].country;
 
-            // Check if a state exists in the API response for this location
             if (stateName) {
-                // Displays: "City, State, Country" (e.g., "Bhopal, Madhya Pradesh, IN")
                 locationDOM.textContent = `${cityName}, ${stateName}, ${country}`;
             } else {
-                // Fallback if no state is provided: "City, Country"
                 locationDOM.textContent = `${cityName}, ${country}`;
             }
         } else {
             locationDOM.textContent = "City not found";
         }
-        fetchWeatherData(lat, lon);
+        
+        // Trigger both layout streams synchronously
+        await fetchWeatherData(lat, lon);
+        await fetchExtendedForecastData(lat, lon);
     } catch (error) {
         console.error("Error with reverse geocoding:", error);
         locationDOM.textContent = "Error loading city";
@@ -231,8 +234,6 @@ function getUserLocation() {
         (position) => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-
-            // Send coordinates to get converted into a City Name
             getCityName(lat, lon);
         },
         (error) => {
@@ -262,17 +263,17 @@ async function getCoordinatesBySearch(cityName) {
             const state = data[0].state;
             const country = data[0].country;
 
-            // Update the main card layout
             if (state) {
                 locationDOM.textContent = `${name}, ${state}, ${country}`;
             } else {
                 locationDOM.textContent = `${name}, ${country}`;
             }
 
-            // NEW: Update the metadata country badge beside the unit buttons!
             countryDOM.textContent = `🌐 ${country}`;
 
-            fetchWeatherData(lat, lon);
+            // Sync structural targets side-by-side
+            await fetchWeatherData(lat, lon);
+            await fetchExtendedForecastData(lat, lon);
 
         } else {
             locationDOM.textContent = "Location not found. Try again!";
@@ -294,12 +295,9 @@ searchForm.addEventListener("submit", async (event) => {
         locationDOM.textContent = "Checking location...";
 
         try {
-            // Check if it's an Indian State name
             if (INDIAN_STATE_MAPPING[lowerQuery]) {
-                // Instantly swap the state name for a concrete city OpenWeather understands!
                 query = INDIAN_STATE_MAPPING[lowerQuery];
             } else {
-                // Otherwise, fall back to checking if it's a full country name
                 const countryCheckUrl = `https://restcountries.com/v3.1/name/${encodeURIComponent(query)}?fullText=true`;
                 const countryResponse = await fetch(countryCheckUrl);
 
@@ -314,7 +312,6 @@ searchForm.addEventListener("submit", async (event) => {
             console.log("Proceeding with direct city coordinates check.");
         }
 
-        // This will now receive a clean city name (e.g., "Guwahati") and return perfect weather!
         getCoordinatesBySearch(query);
         searchInput.value = "";
     }
@@ -327,7 +324,7 @@ function celsiusToFahrenheit(celsius) {
 
 // Unified render function to handle layout changes dynamically
 function renderTemperatures() {
-    if (currentTempMetric === null) return; // Guard clause if no data is fetched yet
+    if (currentTempMetric === null) return; 
 
     let displayTemp, displayMax, displayMin;
 
@@ -352,9 +349,11 @@ function renderTemperatures() {
         dayMaxDOM.textContent = `${displayMax}°${currentUnit}`;
         nightMinDOM.textContent = `${displayMin}°${currentUnit}`;
     }
+
+    // 3. Synchronize the extended 5-day forecast data to use the same active unit
+    renderExtendedForecast();
 }
 
-// Function to update active/inactive button visual styling states flawlessly
 // Function to update active/inactive button visual styling states flawlessly
 function updateUnitToggleUI() {
     if (currentUnit === "C") {
@@ -362,28 +361,24 @@ function updateUnitToggleUI() {
         // 1. HIGHLIGHT CELSIUS BUTTON (Active)
         // ==========================================
         unitCBtn.classList.add("text-white", "bg-blue-600", "shadow-sm");
-        // Remove dim states AND hover backgrounds so it stays solid blue on hover
         unitCBtn.classList.remove("text-gray-700", "hover:bg-gray-50");
         
         // ==========================================
         // 2. DIM FAHRENHEIT BUTTON (Inactive)
         // ==========================================
         unitFBtn.classList.remove("text-white", "bg-blue-600", "shadow-sm");
-        // Restore dim text state AND the hover preview interaction state
         unitFBtn.classList.add("text-gray-700", "hover:bg-gray-50");
     } else {
         // ==========================================
         // 3. HIGHLIGHT FAHRENHEIT BUTTON (Active)
         // ==========================================
         unitFBtn.classList.add("text-white", "bg-blue-600", "shadow-sm");
-        // Remove dim states AND hover backgrounds so it stays solid blue on hover
         unitFBtn.classList.remove("text-gray-700", "hover:bg-gray-50");
         
         // ==========================================
         // 4. DIM CELSIUS BUTTON (Inactive)
         // ==========================================
         unitCBtn.classList.remove("text-white", "bg-blue-600", "shadow-sm");
-        // Restore dim text state AND the hover preview interaction state
         unitCBtn.classList.add("text-gray-700", "hover:bg-gray-50");
     }
 }
@@ -407,7 +402,6 @@ unitCBtn.addEventListener("click", () => {
 
 // 5. Function to fetch weather data
 async function fetchWeatherData(lat, lon) {
-    // Exact Current Weather API endpoint structure with Celsius units enabled
     const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
 
     try {
@@ -415,69 +409,54 @@ async function fetchWeatherData(lat, lon) {
         if (!response.ok) throw new Error("Weather data fetch failed");
 
         const data = await response.json();
-
-        // Grab the precise specific description string (e.g. "overcast clouds", "light rain")
         const detailedDescription = data.weather[0].description;
 
-        // Update the entire wrapper setup directly 
         updateCardTheme(detailedDescription);
 
         // ==========================================
-        // CACHE METRIC VALUES & DELEGATE RENDER
+        // CACHE METRIC VALUES WITH SPREAD CHECKS
         // ==========================================
-        // Save raw numeric metrics into global state memory before rendering
         currentTempMetric = data.main.temp;
-        currentMaxMetric = data.main.temp_max;
-        currentMinMetric = data.main.temp_min;
+        
+        const rawMax = data.main.temp_max;
+        const rawMin = data.main.temp_min;
 
-        // Execute unified temperature UI layout updates dynamically
+        if (Math.round(rawMax) === Math.round(rawMin)) {
+            currentMaxMetric = rawMax + 2;
+            currentMinMetric = rawMin - 4;
+        } else {
+            currentMaxMetric = rawMax;
+            currentMinMetric = rawMin;
+        }
+
+        // Run primary DOM painting framework
         renderTemperatures();
 
         // Update non-temperature text condition node
         conditionDOM.textContent = data.weather[0].description;
 
-        // 2. Set the Weather Icon Emoji dynamically
+        // Set the Weather Icon Emoji dynamically
         weatherIconDOM.textContent = getWeatherEmoji(data.weather[0].icon);
 
-        // 3. FIX: Extract the daily maximum and minimum limits logged by the API
-        const maxTemp = Math.round(data.main.temp_max);
-        const minTemp = Math.round(data.main.temp_min);
-
-        // Add a safety check: If max and min are identical (common during midday updates),
-        // create a realistic spread for the Day/Night visual display
-        if (maxTemp === minTemp) {
-            dayMaxDOM.textContent = `${maxTemp + 2}°C`;  // Peak daytime estimated proxy
-            nightMinDOM.textContent = `${minTemp - 4}°C`; // Overnight cooling estimated proxy
-        } else {
-            dayMaxDOM.textContent = `${maxTemp}°C`;
-            nightMinDOM.textContent = `${minTemp}°C`;
-        }
-
-        // 4. Update Humidity & Wind metrics
+        // Update Humidity & Wind metrics
         humidityDOM.textContent = `${data.main.humidity}%`;
 
-        // OpenWeather speed is in meters/sec. Multiplying by 3.6 converts it cleanly to km/h
         const windSpeedKmH = Math.round(data.wind.speed * 3.6);
         windDOM.textContent = `${windSpeedKmH} km/h`;
 
-        // NEW: Rotate the wind arrow based on meteorological degrees
+        // Rotate the wind arrow based on meteorological degrees
         if (data.wind && data.wind.deg !== undefined) {
             const windDegrees = data.wind.deg;
-
-            // OpenWeather degrees: 0° is North (wind blowing from North to South).
-            // Your default emoji icon ⬇️ already points South (matching a 0° North wind perfectly).
-            // We apply standard rotation so it turns exactly where the wind is travelling.
             windDirectionDOM.style.transform = `rotate(${windDegrees}deg)`;
         } else {
-            // Fallback reset if degrees data is missing from the payload
             windDirectionDOM.style.transform = `rotate(0deg)`;
         }
 
         const sunriseTimestamp = data.sys.sunrise;
         const sunsetTimestamp = data.sys.sunset;
-        const timezoneOffset = data.timezone; // Offset from UTC in seconds
+        const timezoneOffset = data.timezone; 
 
-        // Format and display the values
+        // Format and display time parameters
         sunriseDOM.textContent = formatUnixTime(sunriseTimestamp, timezoneOffset);
         sunsetDOM.textContent = formatUnixTime(sunsetTimestamp, timezoneOffset);
 
@@ -489,31 +468,110 @@ async function fetchWeatherData(lat, lon) {
 // 6. Helper function to map OpenWeather icons to clean emojis
 function getWeatherEmoji(iconCode) {
     const iconMap = {
-        "01d": "☀️", "01n": "🌙", // Clear sky
-        "02d": "⛅", "02n": "☁️", // Few clouds
-        "03d": "☁️", "03n": "☁️", // Scattered clouds
-        "04d": "☁️", "04n": "☁️", // Broken clouds
-        "09d": "🌧️", "09n": "🌧️", // Shower rain
-        "10d": "🌦️", "10n": "🌧️", // Rain
-        "11d": "⛈️", "11n": "⛈️", // Thunderstorm
-        "13d": "❄️", "13n": "❄️", // Snow
-        "50d": "🌫️", "50n": "🌫️"  // Mist
+        "01d": "☀️", "01n": "🌙", 
+        "02d": "⛅", "02n": "☁️", 
+        "03d": "☁️", "03n": "☁️", 
+        "04d": "☁️", "04n": "☁️", 
+        "09d": "🌧️", "09n": "🌧️", 
+        "10d": "🌦️", "10n": "🌧️", 
+        "11d": "⛈️", "11n": "⛈️", 
+        "13d": "❄️", "13n": "❄️", 
+        "50d": "🌫️", "50n": "🌫️"  
     };
     return iconMap[iconCode] || "⏳";
 }
 
 // 7. Function to get timezone
 function formatUnixTime(unixTimestamp, timezoneOffset) {
-    // Convert seconds to milliseconds, then adjust for the target location's local shift
-    // accounting for the local browser offset timezone node
     const date = new Date((unixTimestamp + timezoneOffset) * 1000);
-
-    // Format to a clean time string like "6:14 AM" or "7:22 PM"
     return date.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
-        timeZone: 'UTC' // Force UTC parsing since we manually added the localized shift offset
+        timeZone: 'UTC' 
     });
 }
 
+// Function to handle fetching and processing the 5-Day Forecast data stream
+async function fetchExtendedForecastData(lat, lon) {
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
+
+    try {
+        const response = await fetch(forecastUrl);
+        if (!response.ok) throw new Error("Forecast data fetch failed");
+
+        const data = await response.json();
+        const temporaryDailyArray = [];
+
+        // Isolate 1 reading per day (filtering out the 3-hour variance gaps to grab 12:00 PM blocks)
+        data.list.forEach(block => {
+            if (block.dt_txt.includes("12:00:00")) {
+                const dateObject = new Date(block.dt * 1000);
+                
+                const dayName = dateObject.toLocaleDateString("en-US", { weekday: "long" });
+                const dateString = dateObject.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+                temporaryDailyArray.push({
+                    dayName: dayName,
+                    dateString: dateString,
+                    tempC: block.main.temp,
+                    mainCondition: block.weather[0].main,
+                    description: block.weather[0].description,
+                    iconCode: block.weather[0].icon
+                });
+            }
+        });
+
+        // Save raw metric components to global memory
+        currentForecastMetricData = temporaryDailyArray;
+
+        // Render the processed cards inside our template container
+        renderExtendedForecast();
+
+    } catch (error) {
+        console.error("Error fetching or parsing extended forecast:", error);
+    }
+}
+
+// Function to dynamically render the 5-day forecast cards into the DOM
+function renderExtendedForecast() {
+    if (!forecastContainerDOM || currentForecastMetricData.length === 0) return;
+
+    // Flush old card layouts cleanly before redrawing
+    forecastContainerDOM.innerHTML = "";
+
+    currentForecastMetricData.forEach(day => {
+        // Run unit conversion math based on active toggle state
+        let displayTemp = currentUnit === "C" ? Math.round(day.tempC) : celsiusToFahrenheit(day.tempC);
+        
+        // 1. Look up the specific theme config using the day's unique weather description
+        const lookupKey = day.description.toLowerCase().trim();
+        
+        // 2. Fall back to your safe blue default theme if the key isn't perfectly matched
+        const cardTheme = WEATHER_THEMES[lookupKey] || { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-700" };
+        
+        // 3. Construct an explicit inline linear gradient string to cleanly bypass Tailwind v4 compile boundaries
+        const explicitGradientStyle = `background-image: linear-gradient(to bottom, ${cardTheme.from}, ${cardTheme.to});`;
+
+        const cardHTML = `
+            <div style="${explicitGradientStyle}" class="flex items-center justify-between p-4 rounded-xl ${cardTheme.border} border text-white shadow-md transition-all duration-300 hover:scale-[1.02]">
+                <div>
+                    <p class="font-bold tracking-wide text-sm sm:text-base drop-shadow-sm">${day.dayName}</p>
+                    <p class="text-xs opacity-80 drop-shadow-sm">${day.dateString}</p>
+                </div>
+                
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <span class="text-2xl sm:text-3xl drop-shadow-md">${getWeatherEmoji(day.iconCode)}</span>
+                    <span class="text-xs sm:text-sm font-medium capitalize hidden md:inline drop-shadow-sm">${day.description}</span>
+                </div>
+                
+                <div class="text-right">
+                    <p class="text-base sm:text-lg font-extrabold drop-shadow-md">${displayTemp}°${currentUnit}</p>
+                    <p class="text-[10px] sm:text-xs opacity-80 capitalize drop-shadow-sm">${day.mainCondition}</p>
+                </div>
+            </div>
+        `;
+        
+        forecastContainerDOM.insertAdjacentHTML("beforeend", cardHTML);
+    });
+}
