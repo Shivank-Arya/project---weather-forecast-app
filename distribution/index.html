@@ -11,22 +11,35 @@
 
 <body class="bg-gray-50 text-gray-800 antialiased font-sans">
     <!-- ROOT LAYOUT CONTAINER: Maintains identical frame structure for navigation consistency -->
-    <div class="flex min-h-screen">
-
+    <div class="flex flex-col min-h-screen md:flex-row">
         <!-- =========================================================================
          1. LEFT SIDEBAR NAVIGATION PANEL (Shared Component)
          ========================================================================= -->
-        <aside class="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between shrink-0">
+        <aside class="w-full bg-white border-b border-gray-200 p-4 md:p-6 md:w-64 md:border-r md:border-b-0 flex flex-col justify-between shrink-0">
             <div>
-                <!-- Brand Title -->
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-8">
-                    Weather Channel
-                </h1>
+                <div class="flex items-center justify-between">
+                    <!-- Brand Title -->
+                    <a href="index.html">
+                        <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-0">
+                            Weather Channel
+                        </h1>
+                    </a>
+                    <button id="nav-toggle" type="button"
+                        class="md:hidden inline-flex items-center justify-center rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        aria-expanded="false" aria-controls="mobile-nav">
+                        <span class="sr-only">Open navigation</span>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
 
                 <!-- Navigational Routing Context Links -->
-                <nav class="space-y-2">
+                <nav id="mobile-nav" class="mt-4 space-y-2 hidden md:block md:mt-6">
+                    <!-- Active routing tab state shifted over to "Today" -->
                     <a href="index.html"
-                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold bg-blue-50 text-blue-600 transition">
                         <span>Today</span>
                     </a>
                     <a href="5day.html"
@@ -34,7 +47,7 @@
                         <span>5 Day</span>
                     </a>
                     <a href="aqi.html"
-                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-semibold bg-blue-50 text-blue-600 transition">
+                        class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
                         <span>Air Quality Index</span>
                     </a>
                 </nav>
@@ -48,7 +61,7 @@
         <!-- =========================================================================
          MAIN VIEWPORT DASHBOARD CONTENT AREA
          ========================================================================= -->
-        <main class="flex-1 p-8 flex flex-col gap-6 max-w-5xl">
+        <main class="flex-1 p-4 md:p-8 flex flex-col gap-6 max-w-5xl mx-auto w-full">
 
             <!-- =========================================================================
              2. TOP NAVBAR CONTROLS (Shared Component)
@@ -92,16 +105,16 @@
              - Informing user about current temperature, Day/night temperature difference, humidity, sunrise/sunset time for the day and wind speed and direction. 
              ========================================================================= -->
             <section
-                class="bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-md border border-blue-700 max-w-3xl">
+                class="bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-md border border-blue-700 max-w-full w-full">
 
                 <!-- Current Location | Today's Date -->
                 <div class="flex justify-between items-start mb-6">
                     <div>
-                        <h2 id="current-location" class="text-3xl font-bold tracking-tight">Bhopal, MP, India</h2>
+                        <h2 id="current-location" class="text-3xl font-bold tracking-tight">Detecting location...</h2>
                     </div>
                     <span id="current-date"
                         class="text-sm font-medium bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                        24 May 2026
+                        -- --- ----
                     </span>
                 </div>
 
@@ -110,22 +123,22 @@
                     <div>
                         <div class="text-xs uppercase tracking-wider font-semibold opacity-80 mb-1">Weather Today</div>
                         <div class="flex items-center gap-4">
-                            <span id="main-temp" class="text-6xl font-extrabold tracking-tighter">39°C</span>
-                            <span id="weather-icon" class="text-5xl drop-shadow-md">☀️</span>
+                            <span id="main-temp" class="text-6xl font-extrabold tracking-tighter">--°C</span>
+                            <span id="weather-icon" class="text-5xl drop-shadow-md">⏳</span>
                         </div>
-                        <div id="weather-condition" class="text-lg font-medium mt-1">Sunny</div>
+                        <div id="weather-condition" class="text-lg font-medium mt-1">...</div>
                     </div>
 
                     <!-- Day/Night Temperature difference | Sunrise/Sunset Times for the day -->
                     <div class="flex flex-col md:items-end gap-3 text-sm">
                         <div class="font-medium text-base">
-                            Day - <span id="day-max" class="font-semibold">44°C</span> • Night - <span id="night-min"
-                                class="font-semibold">32°C</span>
+                            Day - <span id="day-max" class="font-semibold">--°C</span> • Night - <span id="night-min"
+                                class="font-semibold">--°C</span>
                         </div>
                         <div id="sun-intervals"
                             class="border border-white/30 border-dashed bg-white/5 p-2 rounded-lg text-xs leading-relaxed max-w-xs md:text-right">
-                            <span class="block">🌅 Sunrise: <span class="font-semibold">05:38 AM</span></span>
-                            <span class="block">🌇 Sunset: <span class="font-semibold">07:05 PM</span></span>
+                            <span class="block">🌅 Sunrise: <span class="font-semibold">--:-- AM</span></span>
+                            <span class="block">🌇 Sunset: <span class="font-semibold">--:-- PM</span></span>
                         </div>
                     </div>
                 </div>
@@ -134,12 +147,12 @@
                 <div class="flex gap-8 border-t border-white/20 pt-4 text-sm font-medium">
                     <div class="flex items-center gap-2">
                         <span class="text-lg">💧</span>
-                        <div>Humidity: <span id="humidity-value" class="font-semibold">18%</span></div>
+                        <div>Humidity: <span id="humidity-value" class="font-semibold">--%</span></div>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-lg">💨</span>
-                        <div>Wind: <span id="wind-value" class="font-semibold">18 km/h</span> <span id="wind-direction"
-                                class="inline-block transform rotate-45">⬇️</span></div>
+                        <div>Wind: <span id="wind-value" class="font-semibold">-- km/h</span> <span id="wind-direction"
+                                class="inline-block transition-transform duration-500">⬇️</span></div>
                     </div>
                 </div>
             </section>
@@ -148,69 +161,10 @@
              4. SUB-HERO COMPONENT: Extended Forecast - 
               - Predictions about the forecast for the coming 5 days - expected weather conditions, day/night temperature difference and humidity level. 
              ========================================================================= -->
-            <section class="max-w-3xl">
+            <section class="max-w-full w-full">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Extended Forecast</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <!-- Card 1 -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-xl p-4 text-center flex flex-col items-center justify-between shadow-sm">
-                        <div class="text-sm font-bold text-gray-900">Mon 25</div>
-                        <div class="text-3xl my-2">⛅</div>
-                        <div class="text-sm font-semibold text-gray-800">42° / 29°</div>
-                        <div class="text-xs text-gray-500 mt-1">Partly Cloudy</div>
-                        <div class="text-xs font-semibold text-blue-600 mt-2 flex items-center gap-0.5">
-                            <span>💧</span> 1%
-                        </div>
-                    </div>
-
-                    <!-- Card 2 -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-xl p-4 text-center flex flex-col items-center justify-between shadow-sm">
-                        <div class="text-sm font-bold text-gray-900">Tue 26</div>
-                        <div class="text-3xl my-2">☀️</div>
-                        <div class="text-sm font-semibold text-gray-800">43° / 30°</div>
-                        <div class="text-xs text-gray-500 mt-1">Sunny</div>
-                        <div class="text-xs font-semibold text-blue-600 mt-2 flex items-center gap-0.5">
-                            <span>💧</span> 0%
-                        </div>
-                    </div>
-
-                    <!-- Card 3 -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-xl p-4 text-center flex flex-col items-center justify-between shadow-sm">
-                        <div class="text-sm font-bold text-gray-900">Wed 27</div>
-                        <div class="text-3xl my-2">☀️</div>
-                        <div class="text-sm font-semibold text-gray-800">44° / 31°</div>
-                        <div class="text-xs text-gray-500 mt-1">Sunny</div>
-                        <div class="text-xs font-semibold text-blue-600 mt-2 flex items-center gap-0.5">
-                            <span>💧</span> 0%
-                        </div>
-                    </div>
-
-                    <!-- Card 4 -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-xl p-4 text-center flex flex-col items-center justify-between shadow-sm">
-                        <div class="text-sm font-bold text-gray-900">Thu 28</div>
-                        <div class="text-3xl my-2">☁️</div>
-                        <div class="text-sm font-semibold text-gray-800">41° / 29°</div>
-                        <div class="text-xs text-gray-500 mt-1">Cloudy</div>
-                        <div class="text-xs font-semibold text-blue-600 mt-2 flex items-center gap-0.5">
-                            <span>💧</span> 10%
-                        </div>
-                    </div>
-
-                    <!-- Card 5 -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-xl p-4 text-center flex flex-col items-center justify-between shadow-sm">
-                        <div class="text-sm font-bold text-gray-900">Fri 29</div>
-                        <div class="text-3xl my-2">🌧️</div>
-                        <div class="text-sm font-semibold text-gray-800">38° / 27°</div>
-                        <div class="text-xs text-gray-500 mt-1">Rainy</div>
-                        <div class="text-xs font-semibold text-blue-600 mt-2 flex items-center gap-0.5">
-                            <span>💧</span> 75%
-                        </div>
-                    </div>
-
+                <div id="forecast-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                    <!-- Cards will be dynamically injected here by JS -->
                 </div>
             </section>
         </main>

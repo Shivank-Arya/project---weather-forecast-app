@@ -12,20 +12,33 @@
 <body class="bg-gray-50 text-gray-800 antialiased font-sans">
 
     <!-- ROOT LAYOUT CONTAINER: Maintains identical frame structure for navigation consistency -->
-    <div class="flex min-h-screen">
+    <div class="flex flex-col min-h-screen md:flex-row">
 
         <!-- =========================================================================
          1. LEFT SIDEBAR NAVIGATION PANEL (Shared Component)
          ========================================================================= -->
-        <aside class="w-64 bg-white border-r border-gray-200 p-6 flex flex-col justify-between shrink-0">
+        <aside class="w-full bg-white border-b border-gray-200 p-4 md:p-6 md:w-64 md:border-r md:border-b-0 flex flex-col justify-between shrink-0">
             <div>
-                <!-- Brand Title -->
-                <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-8">
-                    Weather Channel
-                </h1>
+                <div class="flex items-center justify-between">
+                    <!-- Brand Title -->
+                    <a href="index.html">
+                        <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-0">
+                            Weather Channel
+                        </h1>
+                    </a>
+                    <button id="nav-toggle" type="button"
+                        class="md:hidden inline-flex items-center justify-center rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        aria-expanded="false" aria-controls="mobile-nav">
+                        <span class="sr-only">Open navigation</span>
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
 
                 <!-- Navigational Routing Context Links -->
-                <nav class="space-y-2">
+                <nav id="mobile-nav" class="mt-4 space-y-2 hidden md:block md:mt-6">
                     <a href="index.html"
                         class="flex items-center space-x-3 px-4 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
                         <span>Today</span>
@@ -50,7 +63,7 @@
         <!-- =========================================================================
          MAIN VIEWPORT DASHBOARD CONTENT AREA
          ========================================================================= -->
-        <main class="flex-1 p-8 flex flex-col gap-6 max-w-5xl">
+        <main class="flex-1 p-4 md:p-8 flex flex-col gap-6 max-w-5xl w-full mx-auto">
 
             <!-- =========================================================================
              2. TOP NAVBAR CONTROLS (Shared Component)
@@ -93,10 +106,10 @@
                 </div>
 
                 <!-- Main Overview Dashboard Card Box -->
-                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-center">
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-start md:items-center w-full">
                     
                     <!-- Left Split Block: Status Indicator and Gauge Ring Context -->
-                    <div class="flex items-center gap-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 w-full">
                         <!-- Simulated Radial Metric Circle Indicator Gauge -->
                         <div class="relative w-24 h-24 rounded-full border-4 border-emerald-500 flex items-center justify-center bg-gray-50 shrink-0">
                             <span id="aqi-main-value" class="text-3xl font-black text-gray-900">58</span>
@@ -112,7 +125,7 @@
                     </div>
 
                     <!-- Right Split Block: Primary Pollutant Tracking Sidebar Context -->
-                    <div class="w-full md:w-auto md:border-l border-gray-100 md:pl-8 text-sm flex flex-col justify-center min-w-[200px]">
+                    <div class="w-full md:w-auto md:border-l border-gray-100 md:pl-8 text-sm flex flex-col justify-center min-w-0">
                         <span class="text-xs uppercase tracking-wider font-semibold text-gray-400 block mb-1">Primary Pollutant</span>
                         <span id="primary-pollutant-id" class="font-bold text-gray-900 text-base">PM2.5</span>
                         <span class="text-xs text-gray-500 mt-0.5">(Particulate matter less than 2.5 microns)</span>
@@ -132,7 +145,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <!-- POLLUTANT COMPONENT 1: PM2.5 -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <!-- Mini Parameter Value Gauge Ring -->
                         <div class="w-14 h-14 rounded-full border-2 border-emerald-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">58</div>
                         <div class="text-xs">
@@ -143,7 +156,7 @@
                     </div>
 
                     <!-- POLLUTANT COMPONENT 2: CO (Carbon Monoxide) -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">22</div>
                         <div class="text-xs">
                             <h4 class="font-bold text-sm text-gray-900">CO <span class="font-normal text-gray-500 text-xs">(Carbon Monoxide)</span></h4>
@@ -153,7 +166,7 @@
                     </div>
 
                     <!-- POLLUTANT COMPONENT 3: NO2 (Nitrogen Dioxide) -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">26</div>
                         <div class="text-xs">
                             <h4 class="font-bold text-sm text-gray-900">NO2 <span class="font-normal text-gray-500 text-xs">(Nitrogen Dioxide)</span></h4>
@@ -163,7 +176,7 @@
                     </div>
 
                     <!-- POLLUTANT COMPONENT 4: O3 (Ozone) -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">22</div>
                         <div class="text-xs">
                             <h4 class="font-bold text-sm text-gray-900">O3 <span class="font-normal text-gray-500 text-xs">(Ozone)</span></h4>
@@ -173,7 +186,7 @@
                     </div>
 
                     <!-- POLLUTANT COMPONENT 5: PM10 -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">36</div>
                         <div class="text-xs">
                             <h4 class="font-bold text-sm text-gray-900">PM10 <span class="font-normal text-gray-500 text-xs">(Particulate matter &lt; 10µm)</span></h4>
@@ -183,7 +196,7 @@
                     </div>
 
                     <!-- POLLUTANT COMPONENT 6: SO2 (Sulphur Dioxide) -->
-                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div class="w-14 h-14 rounded-full border-2 border-green-500 flex items-center justify-center bg-gray-50 font-bold text-gray-800 text-sm shrink-0">16</div>
                         <div class="text-xs">
                             <h4 class="font-bold text-sm text-gray-900">SO2 <span class="font-normal text-gray-500 text-xs">(Sulphur Dioxide)</span></h4>
