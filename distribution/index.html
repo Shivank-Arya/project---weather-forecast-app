@@ -15,7 +15,8 @@
         <!-- =========================================================================
          1. LEFT SIDEBAR NAVIGATION PANEL (Shared Component)
          ========================================================================= -->
-        <aside class="w-full bg-white border-b border-gray-200 p-4 md:p-6 md:w-64 md:border-r md:border-b-0 flex flex-col justify-between shrink-0">
+        <aside
+            class="w-full bg-white border-b border-gray-200 p-4 md:p-6 md:w-64 md:border-r md:border-b-0 flex flex-col justify-between shrink-0">
             <div>
                 <div class="flex items-center justify-between">
                     <!-- Brand Title -->
@@ -83,8 +84,7 @@
 
                 <!-- Status Metadata Indicators and Unit Selection Panel -->
                 <div class="flex items-center justify-end gap-6 text-sm font-medium text-gray-600">
-                    <span
-                        id="current-country"
+                    <span id="current-country"
                         class="flex items-center gap-1.5 bg-gray-100 px-3 py-1.5 rounded-full text-xs font-semibold text-gray-700">
                         🌐 IN
                     </span>
@@ -138,8 +138,11 @@
                         </div>
                         <div id="sun-intervals"
                             class="border border-white/30 border-dashed bg-white/5 p-2 rounded-lg text-xs leading-relaxed max-w-xs md:text-right">
-                            <span class="block">🌅 Sunrise: <span class="font-semibold">--:-- AM</span></span>
-                            <span class="block">🌇 Sunset: <span class="font-semibold">--:-- PM</span></span>
+                            <span class="block">🌅 Sunrise: <span id="sunrise-time" class="font-semibold">--:--
+                                    AM</span></span>
+
+                            <span class="block">🌇 Sunset: <span id="sunset-time" class="font-semibold">--:--
+                                    PM</span></span>
                         </div>
                     </div>
                 </div>
