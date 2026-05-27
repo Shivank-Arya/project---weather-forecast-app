@@ -501,28 +501,52 @@ async function fetchExtendedForecastData(lat, lon) {
         if (!response.ok) throw new Error("Forecast data fetch failed");
 
         const data = await response.json();
-        const temporaryDailyArray = [];
+        
+        // 1. Get today's date string format (YYYY-MM-DD) to easily exclude it
+        const todayStr = new Date().toISOString().split('T')[0];
 
-        // Isolate 1 reading per day (filtering out the 3-hour variance gaps to grab 12:00 PM blocks)
+        // 2. Group all incoming 3-hour blocks by their calendar date string
+        const groupedByDate = {};
+        
         data.list.forEach(block => {
-            if (block.dt_txt.includes("12:00:00")) {
-                const dateObject = new Date(block.dt * 1000);
-                
-                const dayName = dateObject.toLocaleDateString("en-US", { weekday: "long" });
-                const dateString = dateObject.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            // dt_txt format is "YYYY-MM-DD HH:MM:SS", pulling the date part
+            const datePart = block.dt_txt.split(" ")[0];
+            
+            // Skip today's data entirely
+            if (datePart === todayStr) return;
 
-                temporaryDailyArray.push({
-                    dayName: dayName,
-                    dateString: dateString,
-                    tempC: block.main.temp,
-                    mainCondition: block.weather[0].main,
-                    description: block.weather[0].description,
-                    iconCode: block.weather[0].icon
-                });
+            if (!groupedByDate[datePart]) {
+                groupedByDate[datePart] = [];
             }
+            groupedByDate[datePart].push(block);
         });
 
-        // Save raw metric components to global memory
+        const temporaryDailyArray = [];
+
+        // 3. Iterate through each unique future date group (up to 5 days)
+        const futureDates = Object.keys(groupedByDate).sort().slice(0, 5);
+
+        futureDates.forEach(dateStr => {
+            const dayBlocks = groupedByDate[dateStr];
+            
+            // Try to find a block closest to midday (12:00 PM), fallback to the middle block of the day array
+            const selectedBlock = dayBlocks.find(b => b.dt_txt.includes("12:00:00")) || dayBlocks[Math.floor(dayBlocks.length / 2)];
+            
+            const dateObject = new Date(selectedBlock.dt * 1000);
+            const dayName = dateObject.toLocaleDateString("en-US", { weekday: "long" });
+            const dateString = dateObject.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+            temporaryDailyArray.push({
+                dayName: dayName,
+                dateString: dateString,
+                tempC: selectedBlock.main.temp,
+                mainCondition: selectedBlock.weather[0].main,
+                description: selectedBlock.weather[0].description,
+                iconCode: selectedBlock.weather[0].icon
+            });
+        });
+
+        // Save exactly what we found into global memory
         currentForecastMetricData = temporaryDailyArray;
 
         // Render the processed cards inside our template container
@@ -540,35 +564,38 @@ function renderExtendedForecast() {
     // Flush old card layouts cleanly before redrawing
     forecastContainerDOM.innerHTML = "";
 
-    currentForecastMetricData.forEach(day => {
-        // Run unit conversion math based on active toggle state
+    // Target the next 5 consecutive upcoming days safely
+    const todayWeekday = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    const filteredDays = currentForecastMetricData.filter(day => day.dayName !== todayWeekday).slice(0, 5);
+
+    filteredDays.forEach(day => {
         let displayTemp = currentUnit === "C" ? Math.round(day.tempC) : celsiusToFahrenheit(day.tempC);
         
-        // 1. Look up the specific theme config using the day's unique weather description
+        // Contextual dynamic fallback matching theme dictionary configs
         const lookupKey = day.description.toLowerCase().trim();
-        
-        // 2. Fall back to your safe blue default theme if the key isn't perfectly matched
         const cardTheme = WEATHER_THEMES[lookupKey] || { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-700" };
-        
-        // 3. Construct an explicit inline linear gradient string to cleanly bypass Tailwind v4 compile boundaries
         const explicitGradientStyle = `background-image: linear-gradient(to bottom, ${cardTheme.from}, ${cardTheme.to});`;
 
         const cardHTML = `
-            <div style="${explicitGradientStyle}" class="flex items-center justify-between p-4 rounded-xl ${cardTheme.border} border text-white shadow-md transition-all duration-300 hover:scale-[1.02]">
-                <div>
-                    <p class="font-bold tracking-wide text-sm sm:text-base drop-shadow-sm">${day.dayName}</p>
-                    <p class="text-xs opacity-80 drop-shadow-sm">${day.dateString}</p>
+            <div style="${explicitGradientStyle}" class="flex flex-row lg:flex-col items-center justify-between lg:justify-center p-4 rounded-xl ${cardTheme.border} border text-white shadow-md transition-all duration-300 hover:scale-[1.02] gap-2 min-w-0 w-full text-left lg:text-center">
+                
+                <!-- Date & Day Section -->
+                <div class="min-w-0">
+                    <p class="font-bold tracking-wide text-sm sm:text-base truncate drop-shadow-sm">${day.dayName}</p>
+                    <p class="text-xs opacity-75 drop-shadow-sm">${day.dateString}</p>
                 </div>
                 
-                <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="text-2xl sm:text-3xl drop-shadow-md">${getWeatherEmoji(day.iconCode)}</span>
-                    <span class="text-xs sm:text-sm font-medium capitalize hidden md:inline drop-shadow-sm">${day.description}</span>
+                <!-- Visual Icon Representation -->
+                <div class="flex items-center justify-center my-0 lg:my-2">
+                    <span class="text-2xl sm:text-3xl filter drop-shadow-md select-none">${getWeatherEmoji(day.iconCode)}</span>
                 </div>
                 
-                <div class="text-right">
-                    <p class="text-base sm:text-lg font-extrabold drop-shadow-md">${displayTemp}°${currentUnit}</p>
-                    <p class="text-[10px] sm:text-xs opacity-80 capitalize drop-shadow-sm">${day.mainCondition}</p>
+                <!-- Metrics & Condition Text -->
+                <div class="min-w-0 text-right lg:text-center">
+                    <p class="text-base sm:text-lg font-extrabold tracking-tight drop-shadow-md">${displayTemp}°${currentUnit}</p>
+                    <p class="text-[10px] sm:text-xs font-medium opacity-85 truncate capitalize drop-shadow-sm">${day.mainCondition}</p>
                 </div>
+                
             </div>
         `;
         

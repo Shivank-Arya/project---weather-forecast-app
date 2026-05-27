@@ -105,8 +105,8 @@
              3. HERO COMPONENT: Today's Weather Card
              - Informing user about current temperature, Day/night temperature difference, humidity, sunrise/sunset time for the day and wind speed and direction. 
              ========================================================================= -->
-            <section id="weather-card" 
-            class="bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-md border border-blue-700 max-w-full w-full transition-all duration-700">
+            <section id="weather-card"
+                class="bg-linear-to-b from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-md border border-blue-700 max-w-full w-full transition-all duration-700">
 
                 <!-- Current Location | Today's Date -->
                 <div class="flex justify-between items-start mb-6">
@@ -165,10 +165,11 @@
              4. SUB-HERO COMPONENT: Extended Forecast - 
               - Predictions about the forecast for the coming 5 days - expected weather conditions, day/night temperature difference and humidity level. 
              ========================================================================= -->
-            <section class="max-w-full w-full">
+            <section class="w-full max-w-4xl mt-6 px-2 sm:px-0">
                 <h3 class="text-lg font-bold text-gray-900 mb-4">Extended Forecast</h3>
-                <div id="forecast-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-                    <!-- Cards will be dynamically injected here by JS -->
+
+                <div id="forecast-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full">
+                    <!-- Cards injected dynamically -->
                 </div>
             </section>
         </main>
