@@ -1,7 +1,12 @@
 const API_KEY = '6d92c0d7e1d91eabc65a0b9d974bdc9c';
 
+// Target the location and date elements
 const locationDOM = document.getElementById("current-location");
 const dateDOM = document.getElementById("current-date");
+
+// Target the search form and input elements
+const searchForm = document.querySelector("form"); 
+const searchInput = document.getElementById("city-search");
 
 // Initialize application
 function displayCurrentDate() {
@@ -72,4 +77,52 @@ function getUserLocation() {
     );
 }
 getUserLocation();
+
+// 2. Function to search coordinates by city name
+async function getCoordinatesBySearch(cityName) {
+    const directGeoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${API_KEY}`;
+    
+    try {
+        locationDOM.textContent = "Searching...";
+        
+        const response = await fetch(directGeoUrl);
+        if (!response.ok) throw new Error("Search failed");
+        
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            const lat = data[0].lat;
+            const lon = data[0].lon;
+            const name = data[0].name;
+            const state = data[0].state;
+            const country = data[0].country;
+            
+            // Update UI with the found city details
+            if (state) {
+                locationDOM.textContent = `${name}, ${state}, ${country}`;
+            } else {
+                locationDOM.textContent = `${name}, ${country}`;
+            }
+            
+        } else {
+            locationDOM.textContent = "Location not found. Try again!";
+        }
+    } catch (error) {
+        console.error("Error searching city:", error);
+        locationDOM.textContent = "Error finding location";
+    }
+}
+
+// 3. Event Listener for Form Submission
+searchForm.addEventListener("submit", (event) => {
+    // Prevent the default behavior of forms resetting/reloading the browser page
+    event.preventDefault(); 
+    
+    const query = searchInput.value.trim();
+    
+    if (query) {
+        getCoordinatesBySearch(query);
+        searchInput.value = ""; // Clear the search bar input field after submission
+    }
+});
 
