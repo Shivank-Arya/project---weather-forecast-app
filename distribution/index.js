@@ -1,3 +1,16 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const navToggle = document.getElementById('nav-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    if (!navToggle || !mobileNav) return;
+
+    navToggle.addEventListener('click', () => {
+        mobileNav.classList.toggle('hidden');
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!expanded));
+    });
+});
+
 const API_KEY = '6d92c0d7e1d91eabc65a0b9d974bdc9c';
 
 // List of Indian States 
