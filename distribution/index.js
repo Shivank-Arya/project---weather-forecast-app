@@ -1,8 +1,21 @@
 const API_KEY = '6d92c0d7e1d91eabc65a0b9d974bdc9c';
 
+const COUNTRY_FALLBACKS = {
+    "japan": "Tokyo",
+    "india": "New Delhi",
+    "usa": "Washington D.C.",
+    "united states": "Washington D.C.",
+    "france": "Paris",
+    "germany": "Berlin",
+    "united kingdom": "London",
+    "uk": "London"
+};
+
 // Target the location and date elements
 const locationDOM = document.getElementById("current-location");
 const dateDOM = document.getElementById("current-date");
+// Create a DOM reference for the country badge near the top
+const countryDOM = document.getElementById("current-country");
 
 // Target the search form and input elements
 const searchForm = document.querySelector("form"); 
@@ -33,6 +46,7 @@ async function getCityName(lat, lon) {
         
         // OpenWeatherMap returns an array of results. Grab the first one.
         if (data && data.length > 0) {
+            countryDOM.textContent = `🌐 ${data[0].country}`;
             const cityName = data[0].name;
             const stateName = data[0].state; // <-- Extract the state
             const country = data[0].country;
@@ -97,12 +111,17 @@ async function getCoordinatesBySearch(cityName) {
             const state = data[0].state;
             const country = data[0].country;
             
-            // Update UI with the found city details
+            // Update the main card layout
             if (state) {
                 locationDOM.textContent = `${name}, ${state}, ${country}`;
             } else {
                 locationDOM.textContent = `${name}, ${country}`;
             }
+            
+            // NEW: Update the metadata country badge beside the unit buttons!
+            countryDOM.textContent = `🌐 ${country}`;
+            
+            // fetchWeatherData(lat, lon);
             
         } else {
             locationDOM.textContent = "Location not found. Try again!";
@@ -115,14 +134,20 @@ async function getCoordinatesBySearch(cityName) {
 
 // 3. Event Listener for Form Submission
 searchForm.addEventListener("submit", (event) => {
-    // Prevent the default behavior of forms resetting/reloading the browser page
     event.preventDefault(); 
     
-    const query = searchInput.value.trim();
+    let query = searchInput.value.trim();
     
     if (query) {
+        // Convert input to lowercase to make it case-insensitive
+        const lowerQuery = query.toLowerCase();
+        
+        // If they searched a country name, swap it with its capital city
+        if (COUNTRY_FALLBACKS[lowerQuery]) {
+            query = COUNTRY_FALLBACKS[lowerQuery];
+        }
+        
         getCoordinatesBySearch(query);
-        searchInput.value = ""; // Clear the search bar input field after submission
+        searchInput.value = ""; 
     }
 });
-
