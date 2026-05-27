@@ -150,6 +150,15 @@ function updateCardTheme(weatherDescription) {
     weatherCardDOM.style.backgroundImage = `linear-gradient(to bottom, ${theme.from}, ${theme.to})`;
 }
 
+// Global state variables for temperature unit tracking
+let currentUnit = "C"; 
+let currentTempMetric = null;
+let currentMaxMetric = null;
+let currentMinMetric = null;
+
+const unitFBtn = document.getElementById("unit-f");
+const unitCBtn = document.getElementById("unit-c");
+
 // Initialize application
 function displayCurrentDate() {
     const today = new Date();
@@ -298,6 +307,91 @@ searchForm.addEventListener("submit", async (event) => {
     }
 });
 
+// Helper function to convert Celsius to Fahrenheit cleanly
+function celsiusToFahrenheit(celsius) {
+    return Math.round((celsius * 9) / 5 + 32);
+}
+
+// Unified render function to handle layout changes dynamically
+function renderTemperatures() {
+    if (currentTempMetric === null) return; // Guard clause if no data is fetched yet
+
+    let displayTemp, displayMax, displayMin;
+
+    if (currentUnit === "C") {
+        displayTemp = Math.round(currentTempMetric);
+        displayMax = Math.round(currentMaxMetric);
+        displayMin = Math.round(currentMinMetric);
+    } else {
+        displayTemp = celsiusToFahrenheit(currentTempMetric);
+        displayMax = celsiusToFahrenheit(currentMaxMetric);
+        displayMin = celsiusToFahrenheit(currentMinMetric);
+    }
+
+    // 1. Update main temperature card node
+    mainTempDOM.textContent = `${displayTemp}°${currentUnit}`;
+
+    // 2. Update dynamic daytime spreads with realistic fallback handling
+    if (displayMax === displayMin) {
+        dayMaxDOM.textContent = `${displayMax + (currentUnit === "C" ? 2 : 4)}°${currentUnit}`;
+        nightMinDOM.textContent = `${displayMin - (currentUnit === "C" ? 4 : 7)}°${currentUnit}`;
+    } else {
+        dayMaxDOM.textContent = `${displayMax}°${currentUnit}`;
+        nightMinDOM.textContent = `${displayMin}°${currentUnit}`;
+    }
+}
+
+// Function to update active/inactive button visual styling states flawlessly
+// Function to update active/inactive button visual styling states flawlessly
+function updateUnitToggleUI() {
+    if (currentUnit === "C") {
+        // ==========================================
+        // 1. HIGHLIGHT CELSIUS BUTTON (Active)
+        // ==========================================
+        unitCBtn.classList.add("text-white", "bg-blue-600", "shadow-sm");
+        // Remove dim states AND hover backgrounds so it stays solid blue on hover
+        unitCBtn.classList.remove("text-gray-700", "hover:bg-gray-50");
+        
+        // ==========================================
+        // 2. DIM FAHRENHEIT BUTTON (Inactive)
+        // ==========================================
+        unitFBtn.classList.remove("text-white", "bg-blue-600", "shadow-sm");
+        // Restore dim text state AND the hover preview interaction state
+        unitFBtn.classList.add("text-gray-700", "hover:bg-gray-50");
+    } else {
+        // ==========================================
+        // 3. HIGHLIGHT FAHRENHEIT BUTTON (Active)
+        // ==========================================
+        unitFBtn.classList.add("text-white", "bg-blue-600", "shadow-sm");
+        // Remove dim states AND hover backgrounds so it stays solid blue on hover
+        unitFBtn.classList.remove("text-gray-700", "hover:bg-gray-50");
+        
+        // ==========================================
+        // 4. DIM CELSIUS BUTTON (Inactive)
+        // ==========================================
+        unitCBtn.classList.remove("text-white", "bg-blue-600", "shadow-sm");
+        // Restore dim text state AND the hover preview interaction state
+        unitCBtn.classList.add("text-gray-700", "hover:bg-gray-50");
+    }
+}
+
+// Interactive unified event triggers for both button elements
+unitFBtn.addEventListener("click", () => {
+    if (currentUnit !== "F") {
+        currentUnit = "F";
+        updateUnitToggleUI();
+        renderTemperatures();
+    }
+});
+
+unitCBtn.addEventListener("click", () => {
+    if (currentUnit !== "C") {
+        currentUnit = "C";
+        updateUnitToggleUI();
+        renderTemperatures();
+    }
+});
+
 // 5. Function to fetch weather data
 async function fetchWeatherData(lat, lon) {
     // Exact Current Weather API endpoint structure with Celsius units enabled
@@ -315,8 +409,18 @@ async function fetchWeatherData(lat, lon) {
         // Update the entire wrapper setup directly 
         updateCardTheme(detailedDescription);
 
-        // 1. Update Main Temperature & Condition Description
-        mainTempDOM.textContent = `${Math.round(data.main.temp)}°C`;
+        // ==========================================
+        // CACHE METRIC VALUES & DELEGATE RENDER
+        // ==========================================
+        // Save raw numeric metrics into global state memory before rendering
+        currentTempMetric = data.main.temp;
+        currentMaxMetric = data.main.temp_max;
+        currentMinMetric = data.main.temp_min;
+
+        // Execute unified temperature UI layout updates dynamically
+        renderTemperatures();
+
+        // Update non-temperature text condition node
         conditionDOM.textContent = data.weather[0].description;
 
         // 2. Set the Weather Icon Emoji dynamically
@@ -399,3 +503,4 @@ function formatUnixTime(unixTimestamp, timezoneOffset) {
         timeZone: 'UTC' // Force UTC parsing since we manually added the localized shift offset
     });
 }
+
