@@ -64,6 +64,7 @@ To run this application locally, you do not need to configure complex dev server
    const API_KEY = 'your_openweather_api_key_here';
    ```
    ⚠️ Security Warning: Do not commit your raw API key back to public GitHub repositories. Keep it safe locally!
+   Mine is available just in case...
 
 ###3. **Launch the app:**
    Simply double-click or open `index.html` directly in any modern browser to view the functional interface[cite: 1]!
