@@ -47,3 +47,28 @@ A modern, highly responsive weather forecasting web application featuring real-t
 ├── style.css           # Compiled Tailwind CSS output utility file[cite: 1]
 ├── index.js            # Unified async state engine and DOM rendering logic[cite: 2]
 └── image_a186d9.png    # Interface screenshot asset
+
+## ⚡ Quick Start & Setup
+
+To run this application locally, you do not need to configure complex dev servers.
+
+1. **Clone the repository:**
+```bash
+   git clone [https://github.com/your-username/weather-channel-dashboard.git](https://github.com/your-username/weather-channel-dashboard.git)
+   cd weather-channel-dashboard
+   ```
+
+2. **Configure your API Key:**
+   Open `index.js` and update the global constant with your personal credential if needed[cite: 2]:
+```javascript
+   const API_KEY = 'your_openweather_api_key_here';[cite: 2]
+   ```
+
+3. **Launch the app:**
+   Simply double-click or open `index.html` directly in any modern browser to view the functional interface[cite: 1]!
+
+---
+
+## 🔮 Roadmap / Future Enhancements
+* Incorporate logic mapping for the **5 Day** and **Air Quality Index** standalone navigational routes[cite: 1].
+* Configure a localized caching policy for the forecast payloads to respect external API call volume limits.
