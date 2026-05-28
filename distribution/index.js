@@ -70,7 +70,7 @@ const sunriseDOM = document.getElementById("sunrise-time");
 const sunsetDOM = document.getElementById("sunset-time");
 
 // Global state variable to store parsed 5-day forecast objects
-let currentForecastMetricData = []; 
+let currentForecastMetricData = [];
 let currentActiveThemeBg = { from: "#3b82f6", to: "#1d4ed8" };
 const forecastContainerDOM = document.getElementById("forecast-container");
 
@@ -147,28 +147,28 @@ const WEATHER_THEMES = {
 // Weather Card Theme
 function updateCardTheme(weatherDescription) {
     const lookupKey = weatherDescription.toLowerCase().trim();
-    
+
     const theme = WEATHER_THEMES[lookupKey] || { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-700" };
-    
+
     const currentClasses = Array.from(weatherCardDOM.classList);
     currentClasses.forEach(cls => {
         if (cls.startsWith("border-")) {
             weatherCardDOM.classList.remove(cls);
         }
     });
-    
+
     weatherCardDOM.classList.add(theme.border);
     weatherCardDOM.style.backgroundImage = `linear-gradient(to bottom, ${theme.from}, ${theme.to})`;
 
     // Save the active background values globally for the extended forecast sync
     currentActiveThemeBg = { from: theme.from, to: theme.to };
-    
+
     // Force a re-render of the extended forecast cards with the updated background
     renderExtendedForecast();
 }
 
 // Global state variables for temperature unit tracking
-let currentUnit = "C"; 
+let currentUnit = "C";
 let currentTempMetric = null;
 let currentMaxMetric = null;
 let currentMinMetric = null;
@@ -202,7 +202,7 @@ async function getCityName(lat, lon) {
         if (data && data.length > 0) {
             countryDOM.textContent = `🌐 ${data[0].country}`;
             const cityName = data[0].name;
-            const stateName = data[0].state; 
+            const stateName = data[0].state;
             const country = data[0].country;
 
             if (stateName) {
@@ -213,7 +213,7 @@ async function getCityName(lat, lon) {
         } else {
             locationDOM.textContent = "City not found";
         }
-        
+
         // Trigger both layout streams synchronously
         await fetchWeatherData(lat, lon);
         await fetchExtendedForecastData(lat, lon);
@@ -271,6 +271,9 @@ async function getCoordinatesBySearch(cityName) {
 
             countryDOM.textContent = `🌐 ${country}`;
 
+            // Capture the confirmed match into history storage
+            saveToHistory(name);
+
             // Sync structural targets side-by-side
             await fetchWeatherData(lat, lon);
             await fetchExtendedForecastData(lat, lon);
@@ -313,7 +316,73 @@ searchForm.addEventListener("submit", async (event) => {
         }
 
         getCoordinatesBySearch(query);
+        dropdownDOM.classList.add("hidden"); // Clear active layout overlays on explicit entry
         searchInput.value = "";
+    }
+});
+
+// Dropdown DOM Elements and Local History Setup
+const dropdownDOM = document.getElementById("search-dropdown");
+let searchHistory = JSON.parse(localStorage.getItem("weatherSearchHistory")) || [];
+
+// Save valid query history up to a limit of 5 entries
+function saveToHistory(cityName) {
+    if (!cityName) return;
+    // Strip state/country formatting out if present, or maintain pure city name string
+    const cleanName = cityName.split(",")[0].trim();
+
+    // Filter duplicates out and push recent searches to the top
+    searchHistory = searchHistory.filter(item => item.toLowerCase() !== cleanName.toLowerCase());
+    searchHistory.unshift(cleanName);
+
+    if (searchHistory.length > 5) searchHistory.pop(); // Cap history length
+    localStorage.setItem("weatherSearchHistory", JSON.stringify(searchHistory));
+}
+
+// Render dynamic elements inside the dropdown panel
+function renderDropdown() {
+    if (!dropdownDOM) return;
+    dropdownDOM.innerHTML = "";
+
+    // 1. Core Default: Current Location Quick Switcher
+    const currentLocRow = document.createElement("div");
+    currentLocRow.className = "px-4 py-2.5 hover:bg-blue-50 cursor-pointer text-sm font-semibold text-blue-600 flex items-center gap-2 transition";
+    currentLocRow.innerHTML = "<span>📍</span> Use Current Location";
+    currentLocRow.addEventListener("click", () => {
+        getUserLocation();
+        dropdownDOM.classList.add("hidden");
+    });
+    dropdownDOM.appendChild(currentLocRow);
+
+    // 2. Loop through recent persistent historic user selections
+    searchHistory.forEach(city => {
+        const historyRow = document.createElement("div");
+        historyRow.className = "px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 truncate flex items-center justify-between transition";
+        historyRow.innerHTML = `<span>⏳ ${city}</span>`;
+
+        historyRow.addEventListener("click", () => {
+            searchInput.value = city;
+            getCoordinatesBySearch(city);
+            dropdownDOM.classList.add("hidden");
+            searchInput.value = "";
+        });
+        dropdownDOM.appendChild(historyRow);
+    });
+}
+
+// Interaction listeners for toggle display streams
+searchInput.addEventListener("focus", () => {
+    // Only reveal dropdown framework if history contains values 
+    if (searchHistory.length > 0) {
+        renderDropdown();
+        dropdownDOM.classList.remove("hidden");
+    }
+});
+
+// Dismiss dropdown gracefully if user clicks anywhere outside the form viewport context
+document.addEventListener("click", (event) => {
+    if (dropdownDOM && !searchForm.contains(event.target)) {
+        dropdownDOM.classList.add("hidden");
     }
 });
 
@@ -324,7 +393,7 @@ function celsiusToFahrenheit(celsius) {
 
 // Unified render function to handle layout changes dynamically
 function renderTemperatures() {
-    if (currentTempMetric === null) return; 
+    if (currentTempMetric === null) return;
 
     let displayTemp, displayMax, displayMin;
 
@@ -362,7 +431,7 @@ function updateUnitToggleUI() {
         // ==========================================
         unitCBtn.classList.add("text-white", "bg-blue-600", "shadow-sm");
         unitCBtn.classList.remove("text-gray-700", "hover:bg-gray-50");
-        
+
         // ==========================================
         // 2. DIM FAHRENHEIT BUTTON (Inactive)
         // ==========================================
@@ -374,7 +443,7 @@ function updateUnitToggleUI() {
         // ==========================================
         unitFBtn.classList.add("text-white", "bg-blue-600", "shadow-sm");
         unitFBtn.classList.remove("text-gray-700", "hover:bg-gray-50");
-        
+
         // ==========================================
         // 4. DIM CELSIUS BUTTON (Inactive)
         // ==========================================
@@ -417,7 +486,7 @@ async function fetchWeatherData(lat, lon) {
         // CACHE METRIC VALUES WITH SPREAD CHECKS
         // ==========================================
         currentTempMetric = data.main.temp;
-        
+
         const rawMax = data.main.temp_max;
         const rawMin = data.main.temp_min;
 
@@ -454,7 +523,7 @@ async function fetchWeatherData(lat, lon) {
 
         const sunriseTimestamp = data.sys.sunrise;
         const sunsetTimestamp = data.sys.sunset;
-        const timezoneOffset = data.timezone; 
+        const timezoneOffset = data.timezone;
 
         // Format and display time parameters
         sunriseDOM.textContent = formatUnixTime(sunriseTimestamp, timezoneOffset);
@@ -468,15 +537,15 @@ async function fetchWeatherData(lat, lon) {
 // 6. Helper function to map OpenWeather icons to clean emojis
 function getWeatherEmoji(iconCode) {
     const iconMap = {
-        "01d": "☀️", "01n": "🌙", 
-        "02d": "⛅", "02n": "☁️", 
-        "03d": "☁️", "03n": "☁️", 
-        "04d": "☁️", "04n": "☁️", 
-        "09d": "🌧️", "09n": "🌧️", 
-        "10d": "🌦️", "10n": "🌧️", 
-        "11d": "⛈️", "11n": "⛈️", 
-        "13d": "❄️", "13n": "❄️", 
-        "50d": "🌫️", "50n": "🌫️"  
+        "01d": "☀️", "01n": "🌙",
+        "02d": "⛅", "02n": "☁️",
+        "03d": "☁️", "03n": "☁️",
+        "04d": "☁️", "04n": "☁️",
+        "09d": "🌧️", "09n": "🌧️",
+        "10d": "🌦️", "10n": "🌧️",
+        "11d": "⛈️", "11n": "⛈️",
+        "13d": "❄️", "13n": "❄️",
+        "50d": "🌫️", "50n": "🌫️"
     };
     return iconMap[iconCode] || "⏳";
 }
@@ -488,7 +557,7 @@ function formatUnixTime(unixTimestamp, timezoneOffset) {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
-        timeZone: 'UTC' 
+        timeZone: 'UTC'
     });
 }
 
@@ -501,17 +570,17 @@ async function fetchExtendedForecastData(lat, lon) {
         if (!response.ok) throw new Error("Forecast data fetch failed");
 
         const data = await response.json();
-        
+
         // 1. Get today's date string format (YYYY-MM-DD) to easily exclude it
         const todayStr = new Date().toISOString().split('T')[0];
 
         // 2. Group all incoming 3-hour blocks by their calendar date string
         const groupedByDate = {};
-        
+
         data.list.forEach(block => {
             // dt_txt format is "YYYY-MM-DD HH:MM:SS", pulling the date part
             const datePart = block.dt_txt.split(" ")[0];
-            
+
             // Skip today's data entirely
             if (datePart === todayStr) return;
 
@@ -528,10 +597,10 @@ async function fetchExtendedForecastData(lat, lon) {
 
         futureDates.forEach(dateStr => {
             const dayBlocks = groupedByDate[dateStr];
-            
+
             // Try to find a block closest to midday (12:00 PM), fallback to the middle block of the day array
             const selectedBlock = dayBlocks.find(b => b.dt_txt.includes("12:00:00")) || dayBlocks[Math.floor(dayBlocks.length / 2)];
-            
+
             const dateObject = new Date(selectedBlock.dt * 1000);
             const dayName = dateObject.toLocaleDateString("en-US", { weekday: "long" });
             const dateString = dateObject.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -570,7 +639,7 @@ function renderExtendedForecast() {
 
     filteredDays.forEach(day => {
         let displayTemp = currentUnit === "C" ? Math.round(day.tempC) : celsiusToFahrenheit(day.tempC);
-        
+
         // Contextual dynamic fallback matching theme dictionary configs
         const lookupKey = day.description.toLowerCase().trim();
         const cardTheme = WEATHER_THEMES[lookupKey] || { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-700" };
@@ -598,7 +667,7 @@ function renderExtendedForecast() {
                 
             </div>
         `;
-        
+
         forecastContainerDOM.insertAdjacentHTML("beforeend", cardHTML);
     });
 }

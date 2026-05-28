@@ -74,11 +74,15 @@
                     <div class="relative w-full">
                         <input type="text" id="city-search"
                             class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pr-10"
-                            placeholder="Search city..." required />
+                            placeholder="Search city..." required autocomplete="off" />
                         <button type="submit"
                             class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-blue-600">
                             <span>🔍</span>
                         </button>
+
+                        <div id="search-dropdown"
+                            class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 hidden max-h-60 overflow-y-auto split-y divide-y divide-gray-100">
+                        </div>
                     </div>
                 </form>
 
