@@ -2,7 +2,7 @@
 
 A modern, highly responsive weather forecasting web application featuring real-time data visualization, dynamic contextual theme shifts, and smart search capabilities[cite: 1, 2]. Built entirely with semantic HTML5, Tailwind CSS, and vanilla JavaScript, it provides a seamless user experience across mobile, tablet, and desktop devices[cite: 1].
 
-![Weather Dashboard Preview](image_a186d9.png)
+![Weather Dashboard Preview](./img/weather%20channel%20dashboard.png)
 
 ---
 
