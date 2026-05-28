@@ -2,7 +2,7 @@
 
 A modern, highly responsive weather forecasting web application featuring real-time data visualization, dynamic contextual theme shifts, and smart search capabilities[cite: 1, 2]. Built entirely with semantic HTML5, Tailwind CSS, and vanilla JavaScript, it provides a seamless user experience across mobile, tablet, and desktop devices[cite: 1].
 
-![Weather Dashboard Preview](./img/weather%20channel%20dashboard.png)
+![Weather Dashboard Preview](./img/)
 
 ---
 
@@ -53,15 +53,15 @@ A modern, highly responsive weather forecasting web application featuring real-t
 To run this application locally, you do not need to configure complex dev servers.
 
 1. **Clone the repository:**
-```bash
-   git clone [https://github.com/your-username/weather-channel-dashboard.git](https://github.com/your-username/weather-channel-dashboard.git)
-   cd weather-channel-dashboard
+   ```bash
+   git clone https://github.com/Shivank-Arya/project---weather-forecast-app.git
+   cd project---weather-forecast-app
    ```
 
 2. **Configure your API Key:**
-   Open `index.js` and update the global constant with your personal credential if needed[cite: 2]:
-```javascript
-   const API_KEY = 'your_openweather_api_key_here';[cite: 2]
+   Open `index.js` and update the global constant with your personal credential:
+   ```javascript
+   const API_KEY = 'your_openweather_api_key_here';
    ```
 
 3. **Launch the app:**
