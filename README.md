@@ -41,11 +41,11 @@ A modern, highly responsive weather forecasting web application featuring real-t
 
 ```bash
 ├── index.html          # Core layout, sidebar routing context, and structural frames
-├── 5day.html           # Dedicated multi-day extended breakdown view (Route Placeholder)
-├── aqi.html            # Dedicated Air Quality Index panel (Route Placeholder)
+├── 5day.html           # Dedicated multi-day extended breakdown view (Route Placeholder) - to be added later
+├── aqi.html            # Dedicated Air Quality Index panel (Route Placeholder) - to be added later
 ├── style.css           # Compiled Tailwind CSS output utility file
 ├── index.js            # Unified async state engine and DOM rendering logic
-└── image_a186d9.png    # Interface screenshot asset
+└── /img/weather-channel-dashboard-2.png    # Interface screenshot asset
 ```
 
 ## ⚡ Quick Start & Setup
