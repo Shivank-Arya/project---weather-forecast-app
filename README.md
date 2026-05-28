@@ -46,6 +46,7 @@ A modern, highly responsive weather forecasting web application featuring real-t
 ├── style.css           # Compiled Tailwind CSS output utility file
 ├── index.js            # Unified async state engine and DOM rendering logic
 └── image_a186d9.png    # Interface screenshot asset
+```
 
 ## ⚡ Quick Start & Setup
 
