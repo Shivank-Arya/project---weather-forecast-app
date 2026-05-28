@@ -469,7 +469,7 @@ unitCBtn.addEventListener("click", () => {
     }
 });
 
-// 5. Function to fetch weather data
+// 5. Function to fetch weather data (UPDATED: Added live evaluation hooks for extreme alerts)
 async function fetchWeatherData(lat, lon) {
     const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`;
 
@@ -481,6 +481,11 @@ async function fetchWeatherData(lat, lon) {
         const detailedDescription = data.weather[0].description;
 
         updateCardTheme(detailedDescription);
+
+        // ==========================================
+        // DYNAMIC ALERT EVALUATION ENGINE TRIGGER
+        // ==========================================
+        evaluateWeatherAlerts(data);
 
         // ==========================================
         // CACHE METRIC VALUES WITH SPREAD CHECKS
@@ -531,6 +536,8 @@ async function fetchWeatherData(lat, lon) {
 
     } catch (error) {
         console.error("Error fetching weather data:", error);
+        locationDOM.textContent = "Weather unavailable"; // Replaces "Searching..." safely
+        showSystemError("Failed to sync current weather metrics. Please check your internet connection or try again later.");
     }
 }
 
@@ -578,7 +585,6 @@ async function fetchExtendedForecastData(lat, lon) {
         const groupedByDate = {};
 
         data.list.forEach(block => {
-            // dt_txt format is "YYYY-MM-DD HH:MM:SS", pulling the date part
             const datePart = block.dt_txt.split(" ")[0];
 
             // Skip today's data entirely
@@ -598,7 +604,7 @@ async function fetchExtendedForecastData(lat, lon) {
         futureDates.forEach(dateStr => {
             const dayBlocks = groupedByDate[dateStr];
 
-            // Try to find a block closest to midday (12:00 PM), fallback to the middle block of the day array
+            // Try to find a block closest to midday (12:00 PM), fallback to the middle block
             const selectedBlock = dayBlocks.find(b => b.dt_txt.includes("12:00:00")) || dayBlocks[Math.floor(dayBlocks.length / 2)];
 
             const dateObject = new Date(selectedBlock.dt * 1000);
@@ -611,7 +617,11 @@ async function fetchExtendedForecastData(lat, lon) {
                 tempC: selectedBlock.main.temp,
                 mainCondition: selectedBlock.weather[0].main,
                 description: selectedBlock.weather[0].description,
-                iconCode: selectedBlock.weather[0].icon
+                iconCode: selectedBlock.weather[0].icon,
+                // EXTRACT METRICS SAFELY HERE:
+                humidity: selectedBlock.main.humidity,
+                windSpeed: selectedBlock.wind ? selectedBlock.wind.speed : 0,
+                windDeg: selectedBlock.wind ? selectedBlock.wind.deg : 0
             });
         });
 
@@ -623,6 +633,9 @@ async function fetchExtendedForecastData(lat, lon) {
 
     } catch (error) {
         console.error("Error fetching or parsing extended forecast:", error);
+        // Clean out stagnant HTML blocks from previous lookups inside the container
+        if (forecastContainerDOM) forecastContainerDOM.innerHTML = ""; 
+        showSystemError("Could not retrieve the 5-day extended forecast data grid from the server.");
     }
 }
 
@@ -640,29 +653,51 @@ function renderExtendedForecast() {
     filteredDays.forEach(day => {
         let displayTemp = currentUnit === "C" ? Math.round(day.tempC) : celsiusToFahrenheit(day.tempC);
 
+        // Process wind metrics safely from the updated data object
+        const windSpeedKmH = Math.round(day.windSpeed * 3.6);
+        const windDegrees = day.windDeg !== undefined ? day.windDeg : 0;
+
         // Contextual dynamic fallback matching theme dictionary configs
         const lookupKey = day.description.toLowerCase().trim();
         const cardTheme = WEATHER_THEMES[lookupKey] || { from: "#3b82f6", to: "#1d4ed8", border: "border-blue-700" };
-        const explicitGradientStyle = `background-image: linear-gradient(to bottom, ${cardTheme.from}, ${cardTheme.to});`;
+        
+        // Compact padding to maximize layout efficiency
+        const explicitGradientStyle = `background-image: linear-gradient(to right, ${cardTheme.from}, ${cardTheme.to}); padding: 10px 12px;`;
 
         const cardHTML = `
-            <div style="${explicitGradientStyle}" class="flex flex-row lg:flex-col items-center justify-between lg:justify-center p-4 rounded-xl ${cardTheme.border} border text-white shadow-md transition-all duration-300 hover:scale-[1.02] gap-2 min-w-0 w-full text-left lg:text-center">
+            <div style="${explicitGradientStyle}" class="flex flex-row items-center justify-between rounded-xl ${cardTheme.border} border text-white shadow-md transition-all duration-200 hover:scale-[1.01] w-full gap-1">
                 
-                <!-- Date & Day Section -->
-                <div class="min-w-0">
-                    <p class="font-bold tracking-wide text-sm sm:text-base truncate drop-shadow-sm">${day.dayName}</p>
-                    <p class="text-xs opacity-75 drop-shadow-sm">${day.dateString}</p>
+                <!-- 1. LEFT COLUMN: Day & Date (UPDATED: Downscaled text sizes for maximum tablet clearance) -->
+                <div class="flex flex-col items-center justify-center text-center flex-1 min-w-0">
+                    <p class="font-bold tracking-wide text-[10px] lg:text-sm drop-shadow-sm leading-tight truncate w-full">${day.dayName}</p>
+                    <p class="text-[8.5px] lg:text-xs opacity-75 font-medium drop-shadow-sm mt-0.5 truncate w-full">${day.dateString}</p>
                 </div>
                 
-                <!-- Visual Icon Representation -->
-                <div class="flex items-center justify-center my-0 lg:my-2">
-                    <span class="text-2xl sm:text-3xl filter drop-shadow-md select-none">${getWeatherEmoji(day.iconCode)}</span>
+                <!-- 2. MIDDLE COLUMN: Icon + Temp & Description -->
+                <div class="flex flex-col items-center justify-center text-center flex-1 min-w-0 px-0.5">
+                    <div class="flex items-center gap-1 justify-center w-full">
+                        <span class="text-sm lg:text-xl filter drop-shadow-md select-none leading-none">${getWeatherEmoji(day.iconCode)}</span>
+                        <span class="text-xs lg:text-base font-extrabold tracking-tight drop-shadow-md">${displayTemp}°${currentUnit}</span>
+                    </div>
+                    <p class="text-[9px] lg:text-xs font-medium opacity-85 truncate capitalize drop-shadow-sm mt-0.5 w-full">
+                        ${day.description}
+                    </p>
                 </div>
-                
-                <!-- Metrics & Condition Text -->
-                <div class="min-w-0 text-right lg:text-center">
-                    <p class="text-base sm:text-lg font-extrabold tracking-tight drop-shadow-md">${displayTemp}°${currentUnit}</p>
-                    <p class="text-[10px] sm:text-xs font-medium opacity-85 truncate capitalize drop-shadow-sm">${day.mainCondition}</p>
+
+                <!-- 3. RIGHT COLUMN: Humidity & Wind Parameters -->
+                <div class="flex flex-col items-center justify-center text-center flex-1 min-w-0 gap-0.5 text-[9px] lg:text-xs font-semibold">
+                    <!-- Humidity Row -->
+                    <div class="flex items-center gap-1 justify-center opacity-95 w-full" title="Humidity">
+                        <span>💧</span>
+                        <span class="truncate">${day.humidity}%</span>
+                    </div>
+                    
+                    <!-- Wind Row with Leaf Emoji -->
+                    <div class="flex items-center gap-0.5 justify-center opacity-95 w-full" title="Wind Speed & Direction">
+                        <span>🍃</span>
+                        <span class="truncate">${windSpeedKmH} km/h</span>
+                        <span style="transform: rotate(${windDegrees}deg); display: inline-block;" class="font-black transition-transform origin-center scale-90">↑</span>
+                    </div>
                 </div>
                 
             </div>
@@ -671,3 +706,155 @@ function renderExtendedForecast() {
         forecastContainerDOM.insertAdjacentHTML("beforeend", cardHTML);
     });
 }
+
+// Function to evaluate live weather data parameters for extreme or severe conditions
+function evaluateWeatherAlerts(data) {
+    // 1. Target or automatically provision a container for alert banners above the main card
+    let alertContainer = document.getElementById("alert-container");
+    if (!alertContainer && weatherCardDOM) {
+        alertContainer = document.createElement("div");
+        alertContainer.id = "alert-container";
+        alertContainer.className = "w-full mb-4 flex flex-col gap-3 transition-all duration-300";
+        weatherCardDOM.parentNode.insertBefore(alertContainer, weatherCardDOM);
+    }
+
+    // Always clear old alerts when a new city data stream arrives
+    alertContainer.innerHTML = "";
+
+    const description = data.weather[0].description.toLowerCase().trim();
+    const conditionGroup = data.weather[0].main;
+    const tempCelsius = data.main.temp;
+    const windSpeedKmH = Math.round(data.wind.speed * 3.6);
+
+    const activeAlerts = [];
+
+    // --- ALERT CONFIGURATION CRITERIA ---
+
+    // 1. Torandoes, Squalls, and Hurricanes
+    if (["tornado", "squalls"].includes(description)) {
+        activeAlerts.push({
+            type: "danger",
+            icon: "🌪️",
+            title: "Severe Tornado / Gale Warning",
+            message: "Destructive localized atmospheric forces detected nearby. Take safe indoor shelter immediately."
+        });
+    }
+
+    // 2. Severe and Heavy Thunderstorms
+    if (conditionGroup === "Thunderstorm" && (description.includes("heavy") || description.includes("ragged"))) {
+        activeAlerts.push({
+            type: "danger",
+            icon: "⛈️",
+            title: "Severe Thunderstorm Warning",
+            message: "Violent electrical storms with dangerous lightning and heavy downpours observed. Avoid open outdoor spaces."
+        });
+    }
+
+    // 3. Flash Flood Threats (Torrential Rain)
+    if (["heavy intensity rain", "very heavy rain", "extreme rain", "heavy intensity shower rain"].includes(description)) {
+        activeAlerts.push({
+            type: "warning",
+            icon: "🌧️",
+            title: "Flash Flood Watch",
+            message: "Torrential downpours may cause sudden localized flooding. Avoid driving through subways or low-lying paths."
+        });
+    }
+
+    // 4. Extreme Heat Waves
+    if (tempCelsius >= 40) {
+        activeAlerts.push({
+            type: "warning",
+            icon: "🥵",
+            title: "Extreme Heat Advisory",
+            message: `Dangerously high temperature of ${Math.round(tempCelsius)}°C reported. Stay thoroughly hydrated and avoid direct sun exposure.`
+        });
+    }
+
+    // 5. Blizzards and Deep Freezes
+    if (tempCelsius <= 0) {
+        activeAlerts.push({
+            type: "warning",
+            icon: "🥶",
+            title: "Extreme Freeze Warning",
+            message: `Sub-zero thermal readings (${Math.round(tempCelsius)}°C) detected. Watch out for black ice on roads and keep pets safely sheltered.`
+        });
+    }
+
+    // 6. Destructive High Winds
+    if (windSpeedKmH >= 55) {
+        activeAlerts.push({
+            type: "warning",
+            icon: "💨",
+            title: "High Wind Advisory",
+            message: `Damaging gale winds matching ${windSpeedKmH} km/h detected. Secure loose outdoor property and exercise travel caution.`
+        });
+    }
+
+    // 7. Volcanic Ash / Severe Sandstorms
+    if (["volcanic ash", "sand", "dust"].includes(description)) {
+        activeAlerts.push({
+            type: "danger",
+            icon: "😷",
+            title: "Hazardous Air Quality Alert",
+            message: "Severe airborne particulate visibility impairments reported. Use protective face covers and keep windows sealed shut."
+        });
+    }
+
+    // --- RENDER ALERTS INTO DOM ---
+    if (activeAlerts.length === 0) return; // Exit cleanly if skies are safe and regular
+
+    activeAlerts.forEach((alert, index) => {
+        // Apply responsive visual themes based on alert severity type
+        const themeClass = alert.type === "danger" 
+            ? "bg-red-500/10 border-red-500 text-red-200" 
+            : "bg-amber-500/10 border-amber-500 text-amber-200";
+
+        const alertID = `weather-alert-${index}`;
+
+        const alertHTML = `
+            <div id="${alertID}" class="flex items-start justify-between p-4 rounded-xl border backdrop-blur-md shadow-lg transition-all duration-300 animate-fadeIn ${themeClass}">
+                <div class="flex gap-3">
+                    <span class="text-2xl filter drop-shadow select-none">${alert.icon}</span>
+                    <div class="flex flex-col gap-0.5">
+                        <h4 class="font-extrabold tracking-wide text-sm text-black">${alert.title}</h4>
+                        <p class="text-xs font-medium opacity-90 leading-relaxed">${alert.message}</p>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('${alertID}').remove()" class="text-white/60 hover:text-white transition-colors p-0.5 ml-2 focus:outline-none text-base font-bold select-none" title="Dismiss Alert">
+                    ✕
+                </button>
+            </div>
+        `;
+        alertContainer.insertAdjacentHTML("beforeend", alertHTML);
+    });
+}
+
+// Reusable UI notifier for API / Network exceptions
+function showSystemError(message) {
+    let alertContainer = document.getElementById("alert-container");
+    if (!alertContainer && weatherCardDOM) {
+        alertContainer = document.createElement("div");
+        alertContainer.id = "alert-container";
+        alertContainer.className = "w-full mb-4 flex flex-col gap-3 transition-all duration-300";
+        weatherCardDOM.parentNode.insertBefore(alertContainer, weatherCardDOM);
+    }
+    if (!alertContainer) return;
+
+    const errorId = `sys-error-${Date.now()}`;
+    const errorHTML = `
+        <div id="${errorId}" class="flex items-start justify-between p-4 rounded-xl border backdrop-blur-md shadow-lg bg-red-500/10 border-red-500 text-red-200 transition-all duration-300">
+            <div class="flex gap-3">
+                <span class="text-2xl filter drop-shadow select-none">⚠️</span>
+                <div class="flex flex-col gap-0.5">
+                    <h4 class="font-extrabold tracking-wide text-sm text-white">Application Error</h4>
+                    <p class="text-xs font-medium opacity-90 leading-relaxed">${message}</p>
+                </div>
+            </div>
+            <button onclick="document.getElementById('${errorId}').remove()" class="text-white/60 hover:text-white p-0.5 ml-2 font-bold focus:outline-none">
+                ✕
+            </button>
+        </div>
+    `;
+    alertContainer.insertAdjacentHTML("beforeend", errorHTML);
+}
+
